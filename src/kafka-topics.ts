@@ -19,17 +19,25 @@
  * ticket.delete.user
  */
 export const KafkaTopics = {
-  ticket: {
-    deleteTickets: "ticket.delete.user",
-  },
-
-  invitation: {
-    deleteInvitation: "invitation.delete.user",
-    addGuestId: "invitation.addGuestId.user",
+  event: {
+    addGuest: `ticket.addGuest.event`,
+    addRole: `authentication.addRole.event`,
   },
 
   logstream: {
-    log: "logstream.log.user",
+    event: `event.sendLog.logstream`,
+  },
+  seat: {
+    createSeats: `event.create.seat`,
+  },
+  address: {
+    createAddress: `event.create.address`,
+  },
+  admin: {
+    restart: `event.restart.admin`,
+    shutdown: `event.shutdown.admin`,
+    allRestart: "all.restart.admin",
+    allShutdown: "all.shutdown.admin",
   },
 } as const;
 
