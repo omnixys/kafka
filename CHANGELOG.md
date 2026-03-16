@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.1.2](https://github.com/omnixys/kafka/compare/v1.1.1...v1.1.2) (2026-03-16)
+
+### Event
+
+* **Event:** payload ([](https://github.com/omnixys/kafka/commit/891a630ba9562846a0b72a6c6d2b24186c72632a))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/f9241ff9c88027241e9cbed32c02124c0f0c75f0))
+
 ## [1.1.1](https://github.com/omnixys/kafka/compare/v1.1.0...v1.1.1) (2026-03-16)
 
 ### Event
