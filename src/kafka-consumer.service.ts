@@ -1,0 +1,112 @@
+/**
+ * @license GPL-3.0-or-later
+ * Copyright (C) 2025 Caleb Gyamfi - Omnixys Technologies
+ *
+ * Kafka consumer service responsible for:
+ * - connecting to Kafka
+ * - subscribing to topics
+ * - receiving messages
+ * - forwarding events to the dispatcher
+ */
+
+import {
+  Inject,
+  Injectable,
+  OnApplicationShutdown,
+  OnModuleDestroy,
+  OnModuleInit,
+} from "@nestjs/common";
+import type { Consumer } from "kafkajs";
+
+import { KafkaEventDispatcherService } from "./kafka-event-dispatcher.service.js";
+import { KafkaEventContext } from "./kafka-event.interface.js";
+import { getAllKafkaTopics } from "./kafka-topics.js";
+
+import { KAFKA_CONSUMER } from "./kafka.constants.js";
+
+@Injectable()
+export class KafkaConsumerService
+  implements OnModuleInit, OnModuleDestroy, OnApplicationShutdown
+{
+
+  private isRunning = false;
+  private shutdownRequested = false;
+
+  constructor(  @Inject(KAFKA_CONSUMER)
+  private readonly consumer: Consumer,private readonly dispatcher: KafkaEventDispatcherService) {}
+
+  /**
+   * Called when NestJS module initializes.
+   * Connects the consumer and starts listening for events.
+   */
+  async onModuleInit(): Promise<void> {
+    await this.consumer.connect();
+
+    const topics = getAllKafkaTopics();
+
+    await this.consumer.subscribe({
+      topics,
+      fromBeginning: false,
+    });
+
+    this.isRunning = true;
+
+    await this.consumer.run({
+      eachMessage: async ({ topic, partition, message }) => {
+        if (this.shutdownRequested) return;
+
+        const rawValue = message.value?.toString();
+
+        if (!rawValue) return;
+
+        try {
+          const payload = JSON.parse(rawValue);
+
+          const context: KafkaEventContext = {
+            topic,
+            partition,
+            offset: message.offset,
+            headers: Object.fromEntries(
+              Object.entries(message.headers ?? {}).map(([k, v]) => [
+                k,
+                v?.toString(),
+              ]),
+            ),
+            timestamp: message.timestamp,
+          };
+
+          await this.dispatcher.dispatch(topic, payload, context);
+        } catch (error) {
+          console.error(
+            `Kafka message processing error on topic ${topic}`,
+            error,
+          );
+        }
+      },
+    });
+
+    console.log("Kafka consumer started");
+  }
+
+  /**
+   * Gracefully disconnect the consumer.
+   */
+  async disconnect(): Promise<void> {
+    if (!this.isRunning) return;
+
+    this.shutdownRequested = true;
+
+    await this.consumer.stop();
+    await this.consumer.disconnect();
+
+    this.isRunning = false;
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.disconnect();
+  }
+
+  async onApplicationShutdown(): Promise<void> {
+    await this.disconnect();
+  }
+}
