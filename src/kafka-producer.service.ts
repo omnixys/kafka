@@ -16,6 +16,7 @@ import type { Producer, ProducerRecord } from "kafkajs";
 import { KafkaHeaderBuilder } from "./kafka-header-builder.js";
 import { KAFKA_PRODUCER } from "./kafka.constants.js";
 import { KafkaPayload, KafkaTopic } from "./kafka-event.types.js";
+import { TraceContext } from "@omnixys/contracts";
 
 @Injectable()
 export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
@@ -42,7 +43,7 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
     topic: T,
     payload: KafkaPayload<T>,
     service: string,
-    trace?: { traceId?: string },
+    trace?: TraceContext,
   ): Promise<void> {
     if (this.isShuttingDown) return;
     if (!this.isReady) return;
