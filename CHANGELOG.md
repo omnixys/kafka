@@ -3,6 +3,20 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.1.0](https://github.com/omnixys/kafka/compare/v1.0.0...v1.1.0) (2026-03-16)
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/5bfef48ccc8a0b62dba85ed3365adaf77a5cb8a1))
+
+### README
+
+* **README:** Update README.md ([](https://github.com/omnixys/kafka/commit/b0c6a39d8ac3d10c2239d5ed827327a54c8d7eeb))
+
+### Topic
+
+* **Topic:** Add Event Topics ([](https://github.com/omnixys/kafka/commit/96a612860953b51d482bf1b9bf2faecced80f7dc))
+
 ## 1.0.0 (2026-03-16)
 
 ### ⚠ BREAKING CHANGE
