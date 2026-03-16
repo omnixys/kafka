@@ -79,6 +79,10 @@ export class KafkaEventDispatcherService implements OnModuleInit {
     }
   }
 
+  getRegisteredTopics(): string[] {
+    return [...this.topicToHandler.keys()];
+  }
+
   /**
    * Dispatches an event to the correct Kafka handler.
    */

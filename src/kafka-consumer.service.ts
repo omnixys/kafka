@@ -42,7 +42,12 @@ export class KafkaConsumerService
   async onModuleInit(): Promise<void> {
     await this.consumer.connect();
 
-    const topics = getAllKafkaTopics();
+    const topics = this.dispatcher.getRegisteredTopics();
+
+    if (topics.length === 0) {
+      console.warn("No Kafka topics registered. Consumer will not subscribe.");
+      return;
+    }
 
     await this.consumer.subscribe({
       topics,
