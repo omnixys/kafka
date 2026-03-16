@@ -27,6 +27,7 @@ export const KafkaTopics = {
   // },
   logstream: {
     event: "event.sendLog.logstream",
+      seat: 'seat.sendLog.logstream',
   },
   seat: {
     createSeats: "event.create.seat",

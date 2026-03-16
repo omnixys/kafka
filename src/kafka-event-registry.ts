@@ -30,4 +30,5 @@ export interface KafkaEventRegistry {
   [KafkaTopics.address.createAddress]: EventAddressInput;
 
   [KafkaTopics.logstream.event]: LogEventDTO;
+  [KafkaTopics.logstream.seat]: LogEventDTO;
 }
