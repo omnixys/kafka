@@ -3,6 +3,21 @@
 All notable changes in this project will be documented in this file.
 
 
+## 1.0.0 (2026-03-16)
+
+### ⚠ BREAKING CHANGE
+
+* **Kafka:** Kafka configuration must now be provided via KafkaModule.forRoot().
+Direct usage of internal config files has been removed.
+
+### Kafka
+
+* **Kafka:** introduce configurable KafkaModule and typed event system ([](https://github.com/omnixys/kafka/commit/b54b413350ab96fa02ee6c6e85d77d713e1c39d4))
+
+### Other
+
+* **Other:** Initial commit ([](https://github.com/omnixys/kafka/commit/f8bdc5955bd7b4b38949b29a8e3d5bd32bb3c587))
+
 ## [1.8.3](https://github.com/omnixys/contracts/compare/v1.8.2...v1.8.3) (2026-03-16)
 
 ### Dto
