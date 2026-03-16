@@ -13,7 +13,6 @@ import {
 } from "@nestjs/common";
 import type { Producer, ProducerRecord } from "kafkajs";
 
-import { KafkaEnvelope } from "./kafka-envelope.type.js";
 import { KafkaHeaderBuilder } from "./kafka-header-builder.js";
 import { KAFKA_PRODUCER } from "./kafka.constants.js";
 import { KafkaPayload, KafkaTopic } from "./kafka-event.types.js";

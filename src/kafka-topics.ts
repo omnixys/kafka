@@ -19,26 +19,25 @@
  * ticket.delete.user
  */
 export const KafkaTopics = {
-  event: {
-    addGuest: `ticket.addGuest.event`,
-    addRole: `authentication.addRole.event`,
-  },
-
+  // event: {
+  //   addGuest: "ticket.addGuest.event",
+  //   addRole: "authentication.addRole.event",
+  //     restartEvent: "event.restart.admin",
+  //.    shutdownEvent: "event.shutdown.admin",
+  // },
   logstream: {
-    event: `event.sendLog.logstream`,
+    event: "event.sendLog.logstream",
   },
   seat: {
-    createSeats: `event.create.seat`,
+    createSeats: "event.create.seat",
   },
   address: {
-    createAddress: `event.create.address`,
+    createAddress: "event.create.address",
   },
-  admin: {
-    restart: `event.restart.admin`,
-    shutdown: `event.shutdown.admin`,
-    allRestart: "all.restart.admin",
-    allShutdown: "all.shutdown.admin",
-  },
+  // admin: {
+  //   allRestart: "all.restart.admin",
+  //   allShutdown: "all.shutdown.admin",
+  // },
 } as const;
 
 /**

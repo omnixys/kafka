@@ -55,6 +55,8 @@
     "@nestjs/core": "^11.1.17"
   },
   "dependencies": {
+    "@omnixys/contracts": "^1.8.3",
+    "@omnixys/graphql": "^2.1.2",
     "kafkajs": "^2.2.4"
   }
 }
