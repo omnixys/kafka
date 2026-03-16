@@ -1,0 +1,60 @@
+{
+  "name": "@omnixys/kafka",
+  "version": "0.1.0",
+  "type": "module",
+  "private": false,
+  "packageManager": "pnpm@9.12.0",
+  "description": "Kafka infrastructure module for Omnixys microservices",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "patch": "pnpm version patch",
+    "release": "semantic-release",
+    "lint": "biome lint",
+    "format": "biome format --write",
+    "lint:fix": "biome lint . --write",
+    "check": "biome check .",
+    "check:fix": "biome check --write",
+    "dev": "tsc -w"
+  },
+  "keywords": [
+    "omnixys",
+    "contracts",
+    "microservices"
+  ],
+  "license": "GPL-3.0-or-later",
+  "devDependencies": {
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.4.2",
+    "@nestjs/core": "^11.1.17",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/github": "^12.0.6",
+    "@semantic-release/npm": "^13.1.5",
+    "@semantic-release/release-notes-generator": "^14.1.0",
+    "@types/node": "^25.5.0",
+    "lint-staged": "^16.4.0",
+    "semantic-release": "^25.0.3"
+  },
+  "peerDependencies": {
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/core": "^11.1.17"
+  },
+  "dependencies": {
+    "kafkajs": "^2.2.4"
+  }
+}
