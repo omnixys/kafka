@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.2.0](https://github.com/omnixys/kafka/compare/v1.1.3...v1.2.0) (2026-03-16)
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/b4d62051cf4c44e4007d72ad252772d025743926))
+
+### Seat
+
+* **Seat:** add initial seat Topics ([](https://github.com/omnixys/kafka/commit/2d2e50b63231ad39d4041209c964694ab0ff4fd8))
+
 ## [1.1.3](https://github.com/omnixys/kafka/compare/v1.1.2...v1.1.3) (2026-03-16)
 
 ### KafkaProducer
