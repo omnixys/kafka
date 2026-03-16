@@ -1,219 +1,248 @@
-# 📦 @omnixys/contracts
+# @omnixys/kafka
 
-> **Shared domain contracts for the Omnixys microservice ecosystem.**
+Kafka infrastructure module for Omnixys microservices.
 
-`@omnixys/contracts` defines the **stable, versioned service contracts** shared across all Omnixys microservices.
+This package provides a fully integrated Kafka event system for NestJS applications including:
 
-It contains:
+- Kafka producer and consumer services
+- Typed Kafka events
+- Decorator-based event handlers
+- Automatic handler discovery
+- Standardized Kafka message envelope
+- Trace header propagation
+- Central topic registry
+- Configurable Kafka module
 
-* Domain enums
-* Shared DTOs
-* Value object interfaces
-* Cross-service type definitions
-
-It does **not** contain:
-
-* Business logic
-* Infrastructure (Kafka, Logger, Config)
-* Framework dependencies
-* Prisma models
-* GraphQL resolvers
-
-This package represents the **formal contract layer** between services.
+The package is designed as a reusable infrastructure layer for the Omnixys platform.
 
 ---
 
-# 🏗 Architectural Purpose
+# Features
 
-OmnixysSphere is built as a modular microservice platform .
-
-To ensure:
-
-* Type safety across services
-* Event payload consistency
-* Federation schema stability
-* Predictable versioning
-* Clear service boundaries
-
-All shared domain structures are centralized in this package.
-
-This enforces **Contract-Driven Architecture**.
+- Configurable Kafka client via `KafkaModule.forRoot()`
+- Typed Kafka event registry (topic → payload)
+- Decorator-based event handlers
+- Automatic handler discovery
+- Central Kafka topic registry
+- Standardized event envelope
+- Trace propagation via Kafka headers
+- Graceful shutdown handling
+- Production-ready KafkaJS configuration
 
 ---
 
-# 📁 Package Structure
-
-```text
-src/
-├── enums/
-│   ├── user-type.enum.ts
-│   ├── role-type.enum.ts
-│   ├── status-type.enum.ts
-│   └── ...
-├── dto/
-│   ├── pagination.dto.ts
-│   └── ...
-└── index.ts
-```
-
-Compiled output:
-
-```text
-dist/
-  index.js
-  index.d.ts
-```
-
----
-
-# 🚀 Installation
-
-## GitHub Packages Setup
-
-Create a `.npmrc` (globally recommended):
-
-```ini
-@omnixys:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=${NODE_AUTH_TOKEN}
-```
-
-Set your token:
+# Installation
 
 ```bash
-export NODE_AUTH_TOKEN=ghp_xxxxxxxxx
-```
-
-Then install:
-
-```bash
-pnpm add @omnixys/contracts
-```
+pnpm add @omnixys/kafka
+````
 
 ---
 
-# 🔐 Authentication
+# Basic Usage
 
-For local publishing or installation you need a GitHub Personal Access Token with:
-
-* `read:packages`
-* `write:packages` (for publishing)
-
-In CI, use:
-
-```yaml
-env:
-  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-```
-
----
-
-# 🧠 Usage Example
+## Register Kafka Module
 
 ```ts
-import { UserType } from '@omnixys/contracts';
+import { KafkaModule } from "@omnixys/kafka";
 
-function assignRole(type: UserType) {
-  if (type === UserType.ADMIN) {
-    // ...
+@Module({
+  imports: [
+    KafkaModule.forRoot({
+      clientId: "invitation-service",
+      brokers: ["localhost:9092"],
+      groupId: "invitation-consumer",
+    }),
+  ],
+})
+export class AppModule {}
+```
+
+---
+
+# Publishing Events
+
+Use the `KafkaProducerService` to publish events.
+
+```ts
+import { KafkaProducerService, KafkaTopics } from "@omnixys/kafka";
+
+@Injectable()
+export class InvitationPublisher {
+  constructor(private readonly kafka: KafkaProducerService) {}
+
+  async deleteInvitation(invitationId: string) {
+    await this.kafka.send(
+      KafkaTopics.invitation.deleteInvitation,
+      {
+        invitationId
+      },
+      "invitation-service"
+    );
   }
 }
 ```
 
 ---
 
-# 🧬 GraphQL Integration
+# Consuming Events
 
-Enums must be registered inside each service:
+Kafka event handlers are defined using decorators.
 
 ```ts
-import { registerEnumType } from '@nestjs/graphql';
-import { UserType } from '@omnixys/contracts';
+import {
+  KafkaHandler,
+  KafkaEvent,
+  KafkaTopics,
+  KafkaEventContext,
+} from "@omnixys/kafka";
 
-registerEnumType(UserType, {
-  name: 'UserType',
-});
+@KafkaHandler("InvitationHandler")
+export class InvitationHandler {
+
+  @KafkaEvent(KafkaTopics.invitation.deleteInvitation)
+  async handleDeleteInvitation(
+    topic: string,
+    payload: { invitationId: string },
+    context: KafkaEventContext
+  ) {
+    console.log("Deleting invitation:", payload.invitationId);
+  }
+
+}
 ```
 
-Contracts does not register GraphQL types automatically by design.
+The handler will be automatically discovered and registered.
 
 ---
 
-# 🔄 Versioning Strategy
+# Kafka Event Envelope
 
-This package follows **Semantic Versioning (SemVer)**.
+All Kafka messages follow a standardized envelope structure.
 
-| Change Type                | Version Bump |
-| -------------------------- | ------------ |
-| Add enum value             | MINOR        |
-| Add new type               | MINOR        |
-| Remove enum value          | MAJOR        |
-| Breaking structural change | MAJOR        |
-| Internal fix               | PATCH        |
-
-⚠ Enum values must never be removed in distributed systems unless performing a coordinated MAJOR upgrade.
-
----
-
-# 🛡 Stability Guarantees
-
-This package is considered:
-
-* Stable
-* Infrastructure-agnostic
-* Framework-independent
-* Backwards-compatible within minor versions
-
-Services must treat it as a formal contract boundary.
-
----
-
-# 🚫 Design Principles
-
-This package must remain:
-
-* Free of NestJS dependencies
-* Free of Kafka clients
-* Free of Logger utilities
-* Free of Config logic
-* Free of Prisma models
-
-If logic is required, it belongs in the respective service.
-
----
-
-# 🏛 Future Extensions
-
-Planned complementary packages:
-
-```text
-@omnixys/events
-@omnixys/kafka
-@omnixys/logger
-@omnixys/config
+```json
+{
+  "event": "deleteInvitation",
+  "service": "invitation-service",
+  "version": "v1",
+  "payload": {
+    "invitationId": "abc123"
+  }
+}
 ```
 
-Contracts remains the foundational domain layer.
+This ensures consistency across services.
 
 ---
 
-# 📜 License
+# Kafka Topics
 
-Licensed under **GPL-3.0-or-later** 
+Kafka topics are centrally defined:
 
-© 2026 Omnixys Technologies
+```ts
+export const KafkaTopics = {
+  ticket: {
+    deleteTickets: "ticket.delete.user"
+  },
+
+  invitation: {
+    deleteInvitation: "invitation.delete.user",
+    addGuestId: "invitation.addGuestId.user"
+  },
+
+  logstream: {
+    log: "logstream.log.user"
+  }
+}
+```
 
 ---
 
-# 🧠 Why “contracts”?
+# Typed Kafka Events
 
-This package defines the **formal agreements between services**.
+The package supports typed Kafka events through an event registry.
 
-In a distributed microservice system:
+```ts
+export interface KafkaEventRegistry {
+  [KafkaTopics.invitation.deleteInvitation]: {
+    invitationId: string
+  }
+}
+```
 
-* Contracts define trust boundaries
-* Versioning prevents runtime drift
-* Type safety reduces integration errors
-* Events remain consistent across services
+This enables compile-time validation of event payloads.
 
-It is not just a “types” package —
-it is the architectural backbone of inter-service communication.
+Example:
+
+```ts
+await kafka.send(
+  KafkaTopics.invitation.deleteInvitation,
+  {
+    invitationId: "abc123"
+  }
+)
+```
+
+Invalid payloads will fail during TypeScript compilation.
+
+---
+
+# Kafka Headers
+
+The system automatically attaches standardized Kafka headers.
+
+Example headers:
+
+```
+x-trace-id
+x-event-name
+x-event-type
+x-event-version
+x-service
+```
+
+These headers enable:
+
+* distributed tracing
+* event metadata inspection
+* debugging and observability
+
+---
+
+# Architecture
+
+The internal event flow looks like this:
+
+```
+Service
+   ↓
+KafkaProducerService
+   ↓
+Kafka
+   ↓
+KafkaConsumerService
+   ↓
+KafkaEventDispatcher
+   ↓
+@KafkaEvent handler
+```
+
+---
+
+# Graceful Shutdown
+
+The Kafka module automatically disconnects producer and consumer instances when the NestJS application shuts down.
+
+Supported signals:
+
+* SIGINT
+* SIGTERM
+* app.close()
+
+---
+
+# License
+
+GPL-3.0-or-later
+
+Copyright (C) 2025 Caleb Gyamfi - Omnixys Technologies
