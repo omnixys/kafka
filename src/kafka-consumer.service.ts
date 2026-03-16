@@ -44,6 +44,7 @@ export class KafkaConsumerService
 
     const topics = this.dispatcher.getRegisteredTopics();
 
+    console.log("Kafka consumer subscribed topics:", topics);
     if (topics.length === 0) {
       console.warn("No Kafka topics registered. Consumer will not subscribe.");
       return;

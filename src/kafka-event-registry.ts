@@ -26,6 +26,7 @@ export interface KafkaEventRegistry {
   // };
 
   [KafkaTopics.seat.createSeats]: CreateSeatDTO;
+  [KafkaTopics.seat.deleteSeats]: {actorId: string, eventId: string};
 
   [KafkaTopics.address.createAddress]: EventAddressInput;
 
