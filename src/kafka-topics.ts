@@ -31,7 +31,7 @@ export const KafkaTopics = {
   },
   seat: {
     createSeats: "event.create.seat",
-    deleteSeats: "event delete.seat",
+    deleteSeats: "event.delete.seat",
   },
   address: {
     createAddress: "event.create.address",
