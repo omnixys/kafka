@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.1.3](https://github.com/omnixys/kafka/compare/v1.1.2...v1.1.3) (2026-03-16)
+
+### KafkaProducer
+
+* **KafkaProducer:** add TraceContext as parameter ([](https://github.com/omnixys/kafka/commit/3424aa94ee79138ed1ef4068d632c7a81867d7b5))
+
 ## [1.1.2](https://github.com/omnixys/kafka/compare/v1.1.1...v1.1.2) (2026-03-16)
 
 ### Event
