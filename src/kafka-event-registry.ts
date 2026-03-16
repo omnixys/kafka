@@ -4,7 +4,7 @@
  * Maps Kafka topics to their payload types.
  */
 
-import { CreateSeatDTO } from "@omnixys/contracts";
+import { CreateSeatDTO, LogEventDTO } from "@omnixys/contracts";
 import { KafkaTopics } from "./kafka-topics.js";
 import { EventAddressInput } from "@omnixys/graphql";
 
@@ -25,16 +25,9 @@ export interface KafkaEventRegistry {
   //   guestId: string;
   // };
 
-  [KafkaTopics.seat.createSeats]: {
-    input: CreateSeatDTO;
-  };
+  [KafkaTopics.seat.createSeats]: CreateSeatDTO;
 
-  [KafkaTopics.address.createAddress]: {
-    input: EventAddressInput;
-  };
+  [KafkaTopics.address.createAddress]: EventAddressInput;
 
-  [KafkaTopics.logstream.event]: {
-    level: "info" | "warn" | "error";
-    message: string;
-  };
+  [KafkaTopics.logstream.event]: LogEventDTO;
 }
