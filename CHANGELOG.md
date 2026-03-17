@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.4.0](https://github.com/omnixys/kafka/compare/v1.3.1...v1.4.0) (2026-03-17)
+
+### Authentication
+
+* **Authentication:** add authentication topics ([](https://github.com/omnixys/kafka/commit/13b0f866506aed8f16d26e9ee24533ae2d9ecf45))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/403265e409ac1f9867fd807a9f24cc7a692c17f1))
+
 ## [1.3.1](https://github.com/omnixys/kafka/compare/v1.3.0...v1.3.1) (2026-03-16)
 
 ### Other
