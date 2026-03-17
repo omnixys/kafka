@@ -42,26 +42,32 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
   async send<T extends KafkaTopic>(
     topic: T,
     payload: KafkaPayload<T>,
-    service: string,
+    meta: {
+      service?: string;
+      version?: string;
+      operation?: string;
+    },
     trace?: TraceContext,
   ): Promise<void> {
     if (this.isShuttingDown) return;
     if (!this.isReady) return;
 
+    const { service, version, operation } = meta;
+
     const envelope = {
       event: topic,
       service,
-      version: "v1",
+      version,
       payload,
     };
-      const headers = KafkaHeaderBuilder.buildStandardHeaders(
-        topic,
-        topic,
-        trace,
-        "v1",
-        service,
-      );
-    
+    const headers = KafkaHeaderBuilder.buildStandardHeaders({
+      topic,
+      operation,
+      trace,
+      version,
+      service,
+    });
+
     const record: ProducerRecord = {
       topic,
       messages: [

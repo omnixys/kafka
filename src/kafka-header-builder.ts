@@ -33,13 +33,19 @@ export class KafkaHeaderBuilder {
   /**
    * Builds the default Kafka headers attached to each message.
    */
-  static buildStandardHeaders(
-    topic: string,
-    operation: string,
-    trace?: { traceId?: string },
+  static buildStandardHeaders({
+    topic,
+    operation = "unknown-operation",
+    trace,
     version = "v1",
     service = "unknown-service",
-  ): StandardKafkaHeaders {
+  }: {
+    topic: string;
+    operation?: string;
+    trace?: { traceId?: string };
+    version?: string;
+    service?: string;
+  }): StandardKafkaHeaders {
     const headers: StandardKafkaHeaders = {
       [KAFKA_HEADER_KEYS.EVENT_NAME]: topic,
       [KAFKA_HEADER_KEYS.EVENT_TYPE]: operation,
