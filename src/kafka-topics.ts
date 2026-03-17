@@ -20,46 +20,65 @@
  */
 export const KafkaTopics = {
   address: {
+    restart: `admin.restart.address`,
+    shutdown: `admin.shutdown.address`,
     createEventAddress: "event.create.address",
     deleteEventAddress: "event.delete.address",
     createUserAddresses: "authentication.create.addresses",
     deleteUserAddresses: "authentication.delete.addresses",
   },
-  authentication: {},
+  admin: {
+    allRestart: "all.restart.admin",
+    allShutdown: "all.shutdown.admin",
+  },
+  authentication: {
+    restart: `admin.restart.authentication`,
+    shutdown: `admin.shutdown.authentication`,
+  },
   event: {
-    // addGuest: 'ticket.addGuest.event',
-    // addRole: 'authentication.addRole.event',
-    // restartEvent: 'event.restart.admin',
-    // shutdownEvent: 'event.shutdown.admin',
+    restart: `admin.restart.event`,
+    shutdown: `admin.shutdown.event`,
+  },
+  invitation: {
+    restart: `admin.restart.invitation`,
+    shutdown: `admin.shutdown.invitation`,
+    deleteInvitations: `user.delete.invitation`,
+    addGuestId: `user.addGuestId.invitation`,
   },
   logstream: {
+    restart: `admin.restart.logstream`,
+    shutdown: `admin.shutdown.logstream`,
     authentication: "authentication.send.logstream",
     event: "event.send.logstream",
+    invitation: `invitation.log.logstream`,
     seat: "seat.send.logstream",
+    user: "user.send.logstream",
   },
   notification: {
+    restart: `admin.restart.notification`,
+    shutdown: `admin.shutdown.notification`,
     sendCredentials: "authentication.sendCredentials.notification",
     sendRequestReset: "authentication.sendRequestReset.notification",
     sendMagicLink: "authentication.sendMagicLink.notification",
+    createUser: `user.notifyRegisttration.notification`,
   },
   seat: {
+    restart: `admin.restart.seat`,
+    shutdown: `admin.shutdown.seat`,
     create: "event.create.seat",
     delete: "event.delete.seat",
   },
   ticket: {
-    // createTicket: "authentication.create.ticket",
+    restart: `admin.restart.ticket`,
+    shutdown: `admin.shutdown.ticket`,
   },
   user: {
-    // createUser: "authentication.create.user",
-    // updateUser: "authentication.update.user",
+    restart: `admin.restart.user`,
+    shutdown: `admin.shutdown.user`,
     deleteUser: "authentication.delete.user",
     addId: "authentication.id.user",
     createProviderUser: "authentication.provider.user",
   },
-  // admin: {
-  //   allRestart: 'all.restart.admin',
-  //   allShutdown: 'all.shutdown.admin',
-  // },
 } as const;
 
 /**
