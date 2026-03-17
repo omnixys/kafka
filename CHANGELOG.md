@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.5.1](https://github.com/omnixys/kafka/compare/v1.5.0...v1.5.1) (2026-03-17)
+
+### Topic
+
+* **Topic:** add missing logstream topics ([](https://github.com/omnixys/kafka/commit/425a9a208bbccd7c9d933bd0df14e759ac80d037))
+
 ## [1.5.0](https://github.com/omnixys/kafka/compare/v1.4.0...v1.5.0) (2026-03-17)
 
 ### Kafka
