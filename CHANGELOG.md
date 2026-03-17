@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.5.4](https://github.com/omnixys/kafka/compare/v1.5.3...v1.5.4) (2026-03-17)
+
+### Dto
+
+* **Dto:** update LogDTO ([](https://github.com/omnixys/kafka/commit/a6f4bafc03bfa37391e02fc53655f7b145d3d38d))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/487a7fe9f25d40661808e11a333f064911230bc7))
+
 ## [1.5.3](https://github.com/omnixys/kafka/compare/v1.5.2...v1.5.3) (2026-03-17)
 
 ### Dto
