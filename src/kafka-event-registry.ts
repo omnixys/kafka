@@ -5,7 +5,7 @@
  */
 
 import { EventAddressInput } from "@omnixys/graphql";
-import { KafkaTopics, LogstreamTopic } from "./kafka-topics.js";
+import { KafkaTopics } from "./kafka-topics.js";
 import {
   AddUserIdDTO,
   CreateUserAddressDTO,
@@ -18,18 +18,8 @@ import {
   LogLevel,
   TraceContext,
 } from "@omnixys/shared";
+import { LogDTO } from "./kafka.dto.js";
 
-export interface LogDTO {
-  level: LogLevel;
-  message: string;
-  service: string;
-  operation: string;
-  topic: LogstreamTopic;
-  context: string;
-  traceContext?: TraceContext;
-  timestamp: string;
-  metadata?: Record<string, unknown>;
-}
 /**
  * Event payload definitions
  */

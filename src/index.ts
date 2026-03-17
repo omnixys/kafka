@@ -1,3 +1,5 @@
+export * from './kafka.dto.js';
+
 // Module
 export * from "./kafka.module.js";
 
