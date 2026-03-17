@@ -1,6 +1,6 @@
 {
   "name": "@omnixys/kafka",
-  "version": "1.5.4",
+  "version": "2.0.0",
   "type": "module",
   "private": false,
   "packageManager": "pnpm@9.12.0",

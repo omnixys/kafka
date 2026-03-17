@@ -3,6 +3,13 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.0.0](https://github.com/omnixys/kafka/compare/v1.5.4...v2.0.0) (2026-03-17)
+
+### Package
+
+* **Package:** fix package.json ([](https://github.com/omnixys/kafka/commit/d292bdad92dbb16ae1ad356eee20ef07f71d756a))
+* **Package:** update package.json ([](https://github.com/omnixys/kafka/commit/54173ebff1871c395d76ebf55f55daf5ef343c23))
+
 ## [1.5.4](https://github.com/omnixys/kafka/compare/v1.5.3...v1.5.4) (2026-03-17)
 
 ### Dto
