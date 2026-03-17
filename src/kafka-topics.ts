@@ -9,6 +9,7 @@
  * consistent and type-safe.
  */
 
+
 /**
  * Global Kafka topic registry.
  *
@@ -85,6 +86,10 @@ export const KafkaTopics = {
  * Type representation of the KafkaTopics structure.
  */
 export type KafkaTopicsType = typeof KafkaTopics;
+
+type DeepValueOf<T> = T extends object ? DeepValueOf<T[keyof T]> : T;
+
+export type KafkaTopic = DeepValueOf<typeof KafkaTopics>;
 
 /**
  * Returns all Kafka topics defined in the registry.
