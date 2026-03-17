@@ -14,7 +14,6 @@ export interface LogDTO {
   service: string;
   operation: string;
   topic: LogstreamTopic;
-  context: string;
   traceContext?: TraceContext;
   timestamp: string;
   metadata?: Record<string, unknown>;
