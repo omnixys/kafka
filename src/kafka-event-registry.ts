@@ -41,9 +41,15 @@ export interface KafkaEventRegistry {
   [KafkaTopics.invitation.restart]: UserActionDTO;
   [KafkaTopics.invitation.shutdown]: UserActionDTO;
 
+  [KafkaTopics.logstream.address]: LogEventDTO;
+  [KafkaTopics.logstream.admin]: LogEventDTO;
   [KafkaTopics.logstream.authentication]: LogEventDTO;
   [KafkaTopics.logstream.event]: LogEventDTO;
+  [KafkaTopics.logstream.invitation]: LogEventDTO;
+  [KafkaTopics.logstream.notification]: LogEventDTO;
   [KafkaTopics.logstream.seat]: LogEventDTO;
+  [KafkaTopics.logstream.ticket]: LogEventDTO;
+  [KafkaTopics.logstream.user]: LogEventDTO;
   [KafkaTopics.logstream.restart]: UserActionDTO;
   [KafkaTopics.logstream.shutdown]: UserActionDTO;
 
