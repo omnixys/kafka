@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.3.1](https://github.com/omnixys/kafka/compare/v1.3.0...v1.3.1) (2026-03-16)
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/0a4f5335730a7afae654f30cae753638299eaf21))
+
+### Seat
+
+* **Seat:** fix seat topic ([](https://github.com/omnixys/kafka/commit/884b03cbf6a9091869a22e16e4ddc8441a71b65a))
+
 ## [1.3.0](https://github.com/omnixys/kafka/compare/v1.2.0...v1.3.0) (2026-03-16)
 
 ### Dispatcher
