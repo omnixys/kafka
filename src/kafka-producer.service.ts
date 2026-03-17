@@ -18,6 +18,7 @@ import { KAFKA_PRODUCER } from "./kafka.constants.js";
 import { KafkaPayload, KafkaTopic } from "./kafka-event.types.js";
 import { TraceContext } from "@omnixys/shared";
 
+
 @Injectable()
 export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
   private isReady = false;

@@ -94,6 +94,7 @@ export type KafkaTopicsType = typeof KafkaTopics;
 type DeepValueOf<T> = T extends object ? DeepValueOf<T[keyof T]> : T;
 
 export type KafkaTopic = DeepValueOf<typeof KafkaTopics>;
+export type LogstreamTopic = DeepValueOf<typeof KafkaTopics.logstream>;
 
 /**
  * Returns all Kafka topics defined in the registry.

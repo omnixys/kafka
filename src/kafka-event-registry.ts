@@ -5,7 +5,7 @@
  */
 
 import { EventAddressInput } from "@omnixys/graphql";
-import { KafkaTopics } from "./kafka-topics.js";
+import { KafkaTopics, LogstreamTopic } from "./kafka-topics.js";
 import {
   AddUserIdDTO,
   CreateUserAddressDTO,
@@ -13,11 +13,23 @@ import {
   EventActionDTO,
   UserActionDTO,
   CreateSeatDTO,
-  LogEventDTO,
   SendMagicLinkDTO,
   SendResetLinkDTO,
+  LogLevel,
+  TraceContext,
 } from "@omnixys/shared";
 
+export interface LogDTO {
+  level: LogLevel;
+  message: string;
+  service: string;
+  operation: string;
+  topic: LogstreamTopic;
+  context: string;
+  traceContext?: TraceContext;
+  timestamp: string;
+  metadata?: Record<string, unknown>;
+}
 /**
  * Event payload definitions
  */
@@ -41,17 +53,17 @@ export interface KafkaEventRegistry {
   [KafkaTopics.invitation.restart]: UserActionDTO;
   [KafkaTopics.invitation.shutdown]: UserActionDTO;
 
-  [KafkaTopics.logstream.address]: LogEventDTO;
-  [KafkaTopics.logstream.admin]: LogEventDTO;
-  [KafkaTopics.logstream.authentication]: LogEventDTO;
-  [KafkaTopics.logstream.event]: LogEventDTO;
-  [KafkaTopics.logstream.invitation]: LogEventDTO;
-  [KafkaTopics.logstream.notification]: LogEventDTO;
-  [KafkaTopics.logstream.seat]: LogEventDTO;
-  [KafkaTopics.logstream.ticket]: LogEventDTO;
-  [KafkaTopics.logstream.user]: LogEventDTO;
-  [KafkaTopics.logstream.restart]: UserActionDTO;
-  [KafkaTopics.logstream.shutdown]: UserActionDTO;
+  [KafkaTopics.logstream.address]: LogDTO;
+  [KafkaTopics.logstream.admin]: LogDTO;
+  [KafkaTopics.logstream.authentication]: LogDTO;
+  [KafkaTopics.logstream.event]: LogDTO;
+  [KafkaTopics.logstream.invitation]: LogDTO;
+  [KafkaTopics.logstream.notification]: LogDTO;
+  [KafkaTopics.logstream.seat]: LogDTO;
+  [KafkaTopics.logstream.ticket]: LogDTO;
+  [KafkaTopics.logstream.user]: LogDTO;
+  [KafkaTopics.logstream.restart]: LogDTO;
+  [KafkaTopics.logstream.shutdown]: LogDTO;
 
   [KafkaTopics.notification.sendCredentials]: string;
   [KafkaTopics.notification.sendRequestReset]: SendResetLinkDTO;
