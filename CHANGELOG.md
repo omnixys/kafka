@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.5.3](https://github.com/omnixys/kafka/compare/v1.5.2...v1.5.3) (2026-03-17)
+
+### Dto
+
+* **Dto:** update index.ts ([](https://github.com/omnixys/kafka/commit/56bf6c204f4ab9fb0627d85b133e6e9aa2ca4e0d))
+
 ## [1.5.2](https://github.com/omnixys/kafka/compare/v1.5.1...v1.5.2) (2026-03-17)
 
 ### Other
