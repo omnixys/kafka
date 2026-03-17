@@ -177,7 +177,7 @@ export default {
 ---
 
 🏢 **Organization:** Omnixys
-📦 **Package:** Contracts
+📦 **Package:** Kafka
 🔗 **Repository:** Repository: <%= options.repositoryUrl %>
 🧭 **Docs:** https://omnixys.com/docs
 `,

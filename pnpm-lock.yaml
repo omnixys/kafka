@@ -11,12 +11,12 @@ importers:
       '@nestjs/common':
         specifier: ^11.0.0
         version: 11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@omnixys/contracts':
-        specifier: ^1.9.0
-        version: 1.9.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       '@omnixys/graphql':
         specifier: ^2.1.2
         version: 2.1.2(@nestjs/graphql@13.2.4(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-validator@0.15.1)(graphql@16.13.1)(reflect-metadata@0.2.2))(@omnixys/contracts@1.9.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(class-validator@0.15.1)
+      '@omnixys/shared':
+        specifier: ^2.0.0
+        version: 2.0.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       kafkajs:
         specifier: ^2.2.4
         version: 2.2.4
@@ -341,6 +341,11 @@ packages:
       '@nestjs/graphql': ^13.2.4
       '@omnixys/contracts': ^1.5.1
       class-validator: ^0.15.1
+
+  '@omnixys/shared@2.0.0':
+    resolution: {integrity: sha512-s3USRf8k4heVQptTkl6iHycTInC3HZ2BPrJM2GrVW+sgxAYMfirmGqF6wUOxRuRpjgut6vU2Q8WsBwWV7lNo/Q==, tarball: https://npm.pkg.github.com/download/@omnixys/shared/2.0.0/b2d05441f176e80df53609882edf762280f1f36a}
+    peerDependencies:
+      '@nestjs/common': ^11.0.0
 
   '@pnpm/config.env-replace@1.1.0':
     resolution: {integrity: sha512-htyl8TWnKL7K/ESFa1oW2UB5lVDxuF5DpM7tBi6Hu2LNL3mWkIzNLG6N4zoCUP1lCKNxWy/3iu8mS8MvToGd6w==}
@@ -2212,6 +2217,11 @@ snapshots:
       '@nestjs/graphql': 13.2.4(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-validator@0.15.1)(graphql@16.13.1)(reflect-metadata@0.2.2)
       '@omnixys/contracts': 1.9.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       class-validator: 0.15.1
+
+  '@omnixys/shared@2.0.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))':
+    dependencies:
+      '@nestjs/common': 11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
+      jose: 6.2.1
 
   '@pnpm/config.env-replace@1.1.0': {}
 

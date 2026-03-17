@@ -19,26 +19,46 @@
  * ticket.delete.user
  */
 export const KafkaTopics = {
-  // event: {
-  //   addGuest: "ticket.addGuest.event",
-  //   addRole: "authentication.addRole.event",
-  //     restartEvent: "event.restart.admin",
-  //.    shutdownEvent: "event.shutdown.admin",
-  // },
+  address: {
+    createEventAddress: "event.create.address",
+    deleteEventAddress: "event.delete.address",
+    createUserAddresses: "authentication.create.addresses",
+    deleteUserAddresses: "authentication.delete.addresses",
+  },
+  authentication: {},
+  event: {
+    // addGuest: 'ticket.addGuest.event',
+    // addRole: 'authentication.addRole.event',
+    // restartEvent: 'event.restart.admin',
+    // shutdownEvent: 'event.shutdown.admin',
+  },
   logstream: {
-    event: "event.sendLog.logstream",
-      seat: 'seat.sendLog.logstream',
+    authentication: "authentication.send.logstream",
+    event: "event.send.logstream",
+    seat: "seat.send.logstream",
+  },
+  notification: {
+    sendCredentials: "authentication.sendCredentials.notification",
+    sendRequestReset: "authentication.sendRequestReset.notification",
+    sendMagicLink: "authentication.sendMagicLink.notification",
   },
   seat: {
-    createSeats: "event.create.seat",
-    deleteSeats: "event.delete.seat",
+    create: "event.create.seat",
+    delete: "event.delete.seat",
   },
-  address: {
-    createAddress: "event.create.address",
+  ticket: {
+    // createTicket: "authentication.create.ticket",
+  },
+  user: {
+    // createUser: "authentication.create.user",
+    // updateUser: "authentication.update.user",
+    deleteUser: "authentication.delete.user",
+    addId: "authentication.id.user",
+    createProviderUser: "authentication.provider.user",
   },
   // admin: {
-  //   allRestart: "all.restart.admin",
-  //   allShutdown: "all.shutdown.admin",
+  //   allRestart: 'all.restart.admin',
+  //   allShutdown: 'all.shutdown.admin',
   // },
 } as const;
 
@@ -54,7 +74,7 @@ export type KafkaTopicsType = typeof KafkaTopics;
 export function getAllKafkaTopics(): string[] {
   const flatten = (obj: Record<string, unknown>): string[] =>
     Object.values(obj).flatMap((value) =>
-      typeof value === "string"
+      typeof value === 'string'
         ? [value]
         : flatten(value as Record<string, unknown>),
     );
@@ -66,7 +86,7 @@ export function getAllKafkaTopics(): string[] {
  * Returns a specific topic by domain and key.
  *
  * Example:
- * getTopic("invitation", "deleteInvitation")
+ * getTopic('invitation', 'deleteInvitation')
  */
 export function getTopic<
   D extends keyof KafkaTopicsType,
