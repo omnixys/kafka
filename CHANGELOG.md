@@ -3,6 +3,20 @@
 All notable changes in this project will be documented in this file.
 
 
+## [1.5.0](https://github.com/omnixys/kafka/compare/v1.4.0...v1.5.0) (2026-03-17)
+
+### Kafka
+
+* **Kafka:** introduce centralized topic registry with full type-safety ([](https://github.com/omnixys/kafka/commit/64d0faaccc936a37491ec66d395263b11f104bbb))
+
+### Producer
+
+* **Producer:** update send signature ([](https://github.com/omnixys/kafka/commit/7efe298138e46596cc001dfbcbeb3a51658365ca))
+
+### Topic
+
+* **Topic:** add new topis ([](https://github.com/omnixys/kafka/commit/22265a02b15df1863321c6b44a2c81f0f9e784bc))
+
 ## [1.4.0](https://github.com/omnixys/kafka/compare/v1.3.1...v1.4.0) (2026-03-17)
 
 ### Authentication
