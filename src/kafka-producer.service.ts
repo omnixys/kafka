@@ -70,8 +70,9 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
         attributes: {
           "messaging.system": "kafka",
           "messaging.destination.name": topic,
+          "messaging.destination": topic,
           "messaging.operation": "publish",
-          "service.name": service,
+          "omnixys.service": service,
           "omnixys.operation": operation,
         },
       },
@@ -95,41 +96,45 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
       };
 
 
-const carrier: Record<string, string> = {};
+await context.with(trace.setSpan(activeCtx, span), async () => {
+  const carrier: Record<string, string> = {};
 
-// 🔥 DAS ist der wichtigste Call
-propagation.inject(context.active(), carrier);
+  // 🔥 DAS ist der wichtigste Call
+  propagation.inject(context.active(), carrier);
 
-      const headers = {
-        ...carrier, 
-        ...KafkaHeaderBuilder.buildStandardHeaders({
-          topic,
-          operation,
-          trace: effectiveTrace,
-          version,
-          service,
-        }),
-      };
+  const headers = {
+    ...carrier,
+    // ...KafkaHeaderBuilder.buildStandardHeaders({
+    //   topic,
+    //   operation,
+    //   trace: effectiveTrace,
+    //   version,
+    //   service,
+    // }),
+    "x-event-name": topic,
+    "x-event-type": operation,
+    "x-event-version": version,
+    "x-service": service,
+  };
 
-      console.debug("HEADERS", headers);
+  console.debug("HEADERS", headers);
 
-      const record: ProducerRecord = {
-        topic,
-        messages: [
-          {
-            value: JSON.stringify(envelope),
-            headers,
-          },
-        ],
-      };
+  const record: ProducerRecord = {
+    topic,
+    messages: [
+      {
+        value: JSON.stringify(envelope),
+        headers,
+      },
+    ],
+  };
 
-      await context.with(trace.setSpan(activeCtx, span), async () => {
-        await this.producer.send({
-          ...record,
-          acks: -1,
-          timeout: 5000,
-        });
-      });
+    await this.producer.send({
+      ...record,
+      acks: -1,
+      timeout: 5000,
+    });
+  });
     } catch (error) {
       span.recordException(error as Error);
       throw error;
