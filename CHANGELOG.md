@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.0.0](https://github.com/omnixys/kafka/compare/v2.0.1...v3.0.0) (2026-03-18)
+
+### Kafka
+
+* **Kafka:** introduce standardized trace propagation via Kafka headers ([](https://github.com/omnixys/kafka/commit/d195a8786a3389ab9e27fceb23e01d2fe90a05c2))
+
 ## [2.0.1](https://github.com/omnixys/kafka/compare/v2.0.0...v2.0.1) (2026-03-18)
 
 ### Log
