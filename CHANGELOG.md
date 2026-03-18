@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.0.1](https://github.com/omnixys/kafka/compare/v2.0.0...v2.0.1) (2026-03-18)
+
+### Log
+
+* **Log:** add log ([](https://github.com/omnixys/kafka/commit/291bde63bbcc22506ddc894d6815c6694fdd9fb2))
+
 ## [2.0.0](https://github.com/omnixys/kafka/compare/v1.5.4...v2.0.0) (2026-03-17)
 
 ### Package
