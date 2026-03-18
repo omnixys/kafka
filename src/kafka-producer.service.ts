@@ -78,9 +78,6 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
     );
 
     try {
-      await context.with(trace.setSpan(context.active(), span), async () => {
-        const carrier: Record<string, string> = {};
-        
         const spanCtx = span.spanContext();
 
         const effectiveTrace: TraceContextDTO = {
@@ -97,26 +94,19 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
           payload,
         };
 
-        // 🔥 DAS ist der wichtigste Call
-        propagation.inject(context.active(), carrier);
 
-        console.warn({ context, span, carrier });
+
         console.error({ traceContext, meta });
 
-        const headers = {
-          ...carrier,
-          // ...KafkaHeaderBuilder.buildStandardHeaders({
-          //   topic,
-          //   operation,
-          //   trace: traceContext,
-          //   version,
-          //   service,
-          // }),
-          "x-event-name": topic,
-          "x-event-type": operation,
-          "x-event-version": version,
-          "x-service": service,
-        };
+        const headers = 
+          KafkaHeaderBuilder.buildStandardHeaders({
+            topic,
+            operation,
+            trace: traceContext,
+            version,
+            service,
+          });
+        
 
         console.debug("HEADERS", headers);
 
@@ -135,7 +125,6 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
           acks: -1,
           timeout: 5000,
         });
-      });
     } catch (error) {
       span.recordException(error as Error);
       throw error;
