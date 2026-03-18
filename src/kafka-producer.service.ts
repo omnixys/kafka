@@ -60,6 +60,8 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
       operation = "unknown-operation",
     } = meta;
 
+    console.log({traceContext,meta})
+
     const tracer = trace.getTracer("omnixys-kafka-producer");
     const activeCtx = context.active();
 
@@ -107,7 +109,7 @@ await context.with(trace.setSpan(activeCtx, span), async () => {
     // ...KafkaHeaderBuilder.buildStandardHeaders({
     //   topic,
     //   operation,
-    //   trace: effectiveTrace,
+    //   trace: traceContext,
     //   version,
     //   service,
     // }),
