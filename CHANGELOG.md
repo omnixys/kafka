@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.1.1](https://github.com/omnixys/kafka/compare/v3.1.0...v3.1.1) (2026-03-18)
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/e799db8d438a477a60f236489c85d991691ddcf3))
+
+### Producer
+
+* **Producer:** fix header ([](https://github.com/omnixys/kafka/commit/bf75c62da6c2735d4bc085a75a86f6df1b5bdafb))
+
 ## [3.1.0](https://github.com/omnixys/kafka/compare/v3.0.0...v3.1.0) (2026-03-18)
 
 ### Kafka-tracing
