@@ -104,6 +104,9 @@ await context.with(trace.setSpan(activeCtx, span), async () => {
   // 🔥 DAS ist der wichtigste Call
   propagation.inject(context.active(), carrier);
 
+  console.warn({ context, activeCtx, span, carrier })
+      console.error({ traceContext, meta });
+
   const headers = {
     ...carrier,
     // ...KafkaHeaderBuilder.buildStandardHeaders({
