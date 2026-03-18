@@ -74,15 +74,11 @@ export class KafkaConsumerService
         
           const traceId = headers["x-trace-id"];
         const spanId = headers["x-span-id"];
+
+        console.log({traceId, spanId, headers})
         
         let span;
-        
-                    const carrier = headers;
-
-                    // 🔥 DAS ist der Gamechanger
-                    const ctx = propagation.extract(ROOT_CONTEXT, carrier);
-
-
+      
           if (traceId && spanId) {
             const remoteContext = trace.setSpanContext(context.active(), {
               traceId,
@@ -90,6 +86,7 @@ export class KafkaConsumerService
               traceFlags: 1,
             });
 
+            console.log({remoteContext})
 
 
             span = tracer.startSpan(
@@ -102,8 +99,7 @@ export class KafkaConsumerService
                   "messaging.operation": "receive",
                 },
               },
-              // remoteContext,
-              ctx,
+               remoteContext,
             );
           } else {
             span = tracer.startSpan(`kafka.consume.${topic}`, {
@@ -112,9 +108,6 @@ export class KafkaConsumerService
           }
         
         
-          await context.with(
-            trace.setSpan(ctx, span),
-            async () => {
               try {
                 const rawValue = message.value?.toString();
 
@@ -136,7 +129,11 @@ export class KafkaConsumerService
                     timestamp: message.timestamp,
                   };
 
+
                   await this.dispatcher.dispatch(topic, payload, context);
+
+
+                  console.info({context})
                 } catch (error) {
                   console.error(
                     `Kafka message processing error on topic ${topic}`,
@@ -146,8 +143,6 @@ export class KafkaConsumerService
               } finally {
                 span.end();
               }
-            },
-          );
       },
     });
 

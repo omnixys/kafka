@@ -74,6 +74,7 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
           "messaging.destination": topic,
           "messaging.operation": "publish",
         },
+        
       },
     );
 
@@ -81,7 +82,7 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
         const spanCtx = span.spanContext();
 
         const effectiveTrace: TraceContextDTO = {
-          traceId: spanCtx.traceId,
+          traceId: traceContext?.traceId,
           spanId: spanCtx.spanId,
           parentSpanId: traceContext?.spanId,
           sampled: String(spanCtx.traceFlags === 1),
