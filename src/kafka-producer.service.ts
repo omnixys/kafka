@@ -63,7 +63,6 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
     console.log({traceContext,meta})
 
     const tracer = trace.getTracer("omnixys-kafka-producer");
-    const activeCtx = context.active();
 
     const span = tracer.startSpan(
       `kafka.produce.${topic}`,
@@ -74,72 +73,69 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
           "messaging.destination.name": topic,
           "messaging.destination": topic,
           "messaging.operation": "publish",
-          "omnixys.service": service,
-          "omnixys.operation": operation,
         },
       },
-      activeCtx,
     );
+
     try {
-      const spanCtx = span.spanContext();
+      await context.with(trace.setSpan(context.active(), span), async () => {
+        const carrier: Record<string, string> = {};
+        
+        const spanCtx = span.spanContext();
 
-      const effectiveTrace: TraceContextDTO = {
-        traceId: spanCtx.traceId,
-        spanId: spanCtx.spanId,
-        parentSpanId: traceContext?.spanId,
-        sampled: String(spanCtx.traceFlags === 1),
-      };
+        const effectiveTrace: TraceContextDTO = {
+          traceId: spanCtx.traceId,
+          spanId: spanCtx.spanId,
+          parentSpanId: traceContext?.spanId,
+          sampled: String(spanCtx.traceFlags === 1),
+        };
 
-      const envelope = {
-        event: topic,
-        service,
-        version,
-        payload,
-      };
+        const envelope = {
+          event: topic,
+          service,
+          version,
+          payload,
+        };
 
+        // 🔥 DAS ist der wichtigste Call
+        propagation.inject(context.active(), carrier);
 
-await context.with(trace.setSpan(activeCtx, span), async () => {
-  const carrier: Record<string, string> = {};
+        console.warn({ context, span, carrier });
+        console.error({ traceContext, meta });
 
-  // 🔥 DAS ist der wichtigste Call
-  propagation.inject(context.active(), carrier);
+        const headers = {
+          ...carrier,
+          // ...KafkaHeaderBuilder.buildStandardHeaders({
+          //   topic,
+          //   operation,
+          //   trace: traceContext,
+          //   version,
+          //   service,
+          // }),
+          "x-event-name": topic,
+          "x-event-type": operation,
+          "x-event-version": version,
+          "x-service": service,
+        };
 
-  console.warn({ context, activeCtx, span, carrier })
-      console.error({ traceContext, meta });
+        console.debug("HEADERS", headers);
 
-  const headers = {
-    ...carrier,
-    // ...KafkaHeaderBuilder.buildStandardHeaders({
-    //   topic,
-    //   operation,
-    //   trace: traceContext,
-    //   version,
-    //   service,
-    // }),
-    "x-event-name": topic,
-    "x-event-type": operation,
-    "x-event-version": version,
-    "x-service": service,
-  };
+        const record: ProducerRecord = {
+          topic,
+          messages: [
+            {
+              value: JSON.stringify(envelope),
+              headers,
+            },
+          ],
+        };
 
-  console.debug("HEADERS", headers);
-
-  const record: ProducerRecord = {
-    topic,
-    messages: [
-      {
-        value: JSON.stringify(envelope),
-        headers,
-      },
-    ],
-  };
-
-    await this.producer.send({
-      ...record,
-      acks: -1,
-      timeout: 5000,
-    });
-  });
+        await this.producer.send({
+          ...record,
+          acks: -1,
+          timeout: 5000,
+        });
+      });
     } catch (error) {
       span.recordException(error as Error);
       throw error;
