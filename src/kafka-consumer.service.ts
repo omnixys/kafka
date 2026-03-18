@@ -1,12 +1,5 @@
 /**
- * @license GPL-3.0-or-later
- * Copyright (C) 2025 Caleb Gyamfi - Omnixys Technologies
- *
- * Kafka consumer service responsible for:
- * - connecting to Kafka
- * - subscribing to topics
- * - receiving messages
- * - forwarding events to the dispatcher
+ * KafkaConsumerService (FIXED - OpenTelemetry compliant)
  */
 
 import {
@@ -20,36 +13,36 @@ import type { Consumer } from "kafkajs";
 
 import { KafkaEventDispatcherService } from "./kafka-event-dispatcher.service.js";
 import { KafkaEventContext } from "./kafka-event.interface.js";
-import { getAllKafkaTopics } from "./kafka-topics.js";
 
 import { KAFKA_CONSUMER } from "./kafka.constants.js";
-import { context, propagation, ROOT_CONTEXT, SpanKind, trace } from "@opentelemetry/api";
+
+import {
+  context,
+  propagation,
+  ROOT_CONTEXT,
+  SpanKind,
+  trace,
+} from "@opentelemetry/api";
 
 @Injectable()
 export class KafkaConsumerService
   implements OnModuleInit, OnModuleDestroy, OnApplicationShutdown
 {
-
   private isRunning = false;
   private shutdownRequested = false;
 
-  constructor(  @Inject(KAFKA_CONSUMER)
-  private readonly consumer: Consumer,private readonly dispatcher: KafkaEventDispatcherService) {}
+  constructor(
+    @Inject(KAFKA_CONSUMER)
+    private readonly consumer: Consumer,
+    private readonly dispatcher: KafkaEventDispatcherService,
+  ) {}
 
-  /**
-   * Called when NestJS module initializes.
-   * Connects the consumer and starts listening for events.
-   */
   async onModuleInit(): Promise<void> {
     await this.consumer.connect();
 
     const topics = this.dispatcher.getRegisteredTopics();
 
-    console.log("Kafka consumer subscribed topics:", topics);
-    if (topics.length === 0) {
-      console.warn("No Kafka topics registered. Consumer will not subscribe.");
-      return;
-    }
+    if (topics.length === 0) return;
 
     await this.consumer.subscribe({
       topics,
@@ -62,96 +55,66 @@ export class KafkaConsumerService
       eachMessage: async ({ topic, partition, message }) => {
         if (this.shutdownRequested) return;
 
-          const headers = Object.fromEntries(
-            Object.entries(message.headers ?? {}).map(([k, v]) => [
-              k,
-              v?.toString(),
-            ]),
-          );
-        
-        
+        const headers: Record<string, string> = Object.fromEntries(
+          Object.entries(message.headers ?? {}).map(([k, v]) => [
+            k,
+            v?.toString() ?? "",
+          ]),
+        );
+
+        // ✅ extract context from headers
+        const extractedCtx = propagation.extract(ROOT_CONTEXT, headers);
+
         const tracer = trace.getTracer("omnixys-kafka-consumer");
-        
-          const traceId = headers["x-trace-id"];
-        const spanId = headers["x-span-id"];
 
-        console.log({traceId, spanId, headers})
-        
-        let span;
-      
-          if (traceId && spanId) {
-            const remoteContext = trace.setSpanContext(context.active(), {
-              traceId,
-              spanId,
-              traceFlags: 1,
+        const span = tracer.startSpan(
+          `kafka.consume.${topic}`,
+          {
+            kind: SpanKind.CONSUMER,
+            attributes: {
+              "messaging.system": "kafka",
+              "messaging.destination.name": topic,
+              "messaging.operation": "receive",
+            },
+          },
+          extractedCtx, // ✅ parent context
+        );
+
+        const ctx = trace.setSpan(extractedCtx, span);
+
+        try {
+          await context.with(ctx, async () => {
+            // debug
+            console.log("TRACE CONSUMER", {
+              headers,
+              extractedSpanContext: trace.getSpan(ctx)?.spanContext(),
             });
 
-            console.log({remoteContext})
+            const rawValue = message.value?.toString();
+            if (!rawValue) return;
 
+            const payload = JSON.parse(rawValue);
 
-            span = tracer.startSpan(
-              `kafka.consume.${topic}`,
-              {
-                kind: SpanKind.CONSUMER,
-                attributes: {
-                  "messaging.system": "kafka",
-                  "messaging.destination": topic,
-                  "messaging.operation": "receive",
-                },
-              },
-               remoteContext,
-            );
-          } else {
-            span = tracer.startSpan(`kafka.consume.${topic}`, {
-              kind: SpanKind.CONSUMER,
-            });
-          }
-        
-        
-              try {
-                const rawValue = message.value?.toString();
+            const kafkaContext: KafkaEventContext = {
+              topic,
+              partition,
+              offset: message.offset,
+              headers,
+              timestamp: message.timestamp,
+            };
 
-                if (!rawValue) return;
-
-                try {
-                  const payload = JSON.parse(rawValue);
-
-                  const context: KafkaEventContext = {
-                    topic,
-                    partition,
-                    offset: message.offset,
-                    headers: Object.fromEntries(
-                      Object.entries(message.headers ?? {}).map(([k, v]) => [
-                        k,
-                        v?.toString(),
-                      ]),
-                    ),
-                    timestamp: message.timestamp,
-                  };
-
-
-                  await this.dispatcher.dispatch(topic, payload, context);
-
-
-                  console.info({context})
-                } catch (error) {
-                  console.error(
-                    `Kafka message processing error on topic ${topic}`,
-                    error,
-                  );
-                }
-              } finally {
-                span.end();
-              }
+            await this.dispatcher.dispatch(topic, payload, kafkaContext);
+          });
+        } catch (error) {
+          span.recordException(error as Error);
+          console.error("Kafka processing error", error);
+        } finally {
+          span.end();
+        }
       },
     });
-
-    console.log("Kafka consumer started");
   }
 
-  /**
-   * Gracefully disconnect the consumer.
-   */
   async disconnect(): Promise<void> {
     if (!this.isRunning) return;
 

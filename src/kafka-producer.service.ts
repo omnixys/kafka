@@ -1,8 +1,5 @@
 /**
- * @license GPL-3.0-or-later
- * Copyright (C) 2025 Caleb Gyamfi - Omnixys Technologies
- *
- * Kafka producer service used to publish events to Kafka topics.
+ * KafkaProducerService (FIXED - OpenTelemetry compliant)
  */
 
 import {
@@ -11,14 +8,11 @@ import {
   OnModuleInit,
   OnModuleDestroy,
 } from "@nestjs/common";
-import type { Producer, ProducerRecord } from "kafkajs";
+import type { Producer } from "kafkajs";
 import { context, trace, SpanKind, propagation } from "@opentelemetry/api";
 
-import { KafkaHeaderBuilder } from "./kafka-header-builder.js";
 import { KAFKA_PRODUCER } from "./kafka.constants.js";
 import { KafkaPayload, KafkaTopic } from "./kafka-event.types.js";
-import { TraceContextDTO } from "@omnixys/shared";
-
 
 @Injectable()
 export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
@@ -30,17 +24,11 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
     private readonly producer: Producer,
   ) {}
 
-  /**
-   * Called when the module initializes.
-   */
   async onModuleInit(): Promise<void> {
     await this.producer.connect();
     this.isReady = true;
   }
 
-  /**
-   * Publishes a Kafka message.
-   */
   async send<T extends KafkaTopic>(
     topic: T,
     payload: KafkaPayload<T>,
@@ -49,10 +37,8 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
       version?: string;
       operation?: string;
     },
-    traceContext?: TraceContextDTO,
   ): Promise<void> {
-    if (this.isShuttingDown) return;
-    if (!this.isReady) return;
+    if (this.isShuttingDown || !this.isReady) return;
 
     const {
       service = "unknown-service",
@@ -60,33 +46,32 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
       operation = "unknown-operation",
     } = meta;
 
-    console.log({traceContext,meta})
-
     const tracer = trace.getTracer("omnixys-kafka-producer");
 
-    const span = tracer.startSpan(
-      `kafka.produce.${topic}`,
-      {
-        kind: SpanKind.PRODUCER,
-        attributes: {
-          "messaging.system": "kafka",
-          "messaging.destination.name": topic,
-          "messaging.destination": topic,
-          "messaging.operation": "publish",
-        },
-        
+    const span = tracer.startSpan(`kafka.produce.${topic}`, {
+      kind: SpanKind.PRODUCER,
+      attributes: {
+        "messaging.system": "kafka",
+        "messaging.destination.name": topic,
+        "messaging.operation": "publish",
+        "messaging.client_id": service,
       },
-    );
+    });
+
+    const ctx = trace.setSpan(context.active(), span);
 
     try {
-        const spanCtx = span.spanContext();
+      await context.with(ctx, async () => {
+        const headers: Record<string, string> = {};
 
-        const effectiveTrace: TraceContextDTO = {
-          traceId: traceContext?.traceId,
-          spanId: spanCtx.spanId,
-          parentSpanId: traceContext?.spanId,
-          sampled: String(spanCtx.traceFlags === 1),
-        };
+        // ✅ inject W3C trace context
+        propagation.inject(ctx, headers);
+
+        // debug
+        console.log("TRACE PRODUCER", {
+          spanContext: span.spanContext(),
+          headers,
+        });
 
         const envelope = {
           event: topic,
@@ -95,20 +80,7 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
           payload,
         };
 
-
-        const headers = 
-          KafkaHeaderBuilder.buildStandardHeaders({
-            topic,
-            operation,
-            trace: effectiveTrace,
-            version,
-            service,
-          });
-        
-
-        console.debug("HEADERS", headers);
-
-        const record: ProducerRecord = {
+        await this.producer.send({
           topic,
           messages: [
             {
@@ -116,13 +88,10 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
               headers,
             },
           ],
-        };
-
-        await this.producer.send({
-          ...record,
           acks: -1,
           timeout: 5000,
         });
+      });
     } catch (error) {
       span.recordException(error as Error);
       throw error;
@@ -131,12 +100,8 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  /**
-   * Disconnects the Kafka producer.
-   */
   async disconnect(): Promise<void> {
     if (!this.producer) return;
-
     await this.producer.disconnect();
   }
 
