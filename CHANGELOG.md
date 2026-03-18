@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.1.8](https://github.com/omnixys/kafka/compare/v3.1.7...v3.1.8) (2026-03-18)
+
+### U
+
+* **U:** h ([](https://github.com/omnixys/kafka/commit/6f824d80a8f89fdceeb76fb62b02567684375833))
+
 ## [3.1.7](https://github.com/omnixys/kafka/compare/v3.1.6...v3.1.7) (2026-03-18)
 
 ### U
