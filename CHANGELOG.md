@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.1.4](https://github.com/omnixys/kafka/compare/v3.1.3...v3.1.4) (2026-03-18)
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/ee01aa3eea8854915c35041db96c1b6cdb5d911d))
+
+### U
+
+* **U:** u ([](https://github.com/omnixys/kafka/commit/670d2fb379ae92a0b2c51fb04f7b22b85e48a2cb))
+
 ## [3.1.3](https://github.com/omnixys/kafka/compare/v3.1.2...v3.1.3) (2026-03-18)
 
 ### U
