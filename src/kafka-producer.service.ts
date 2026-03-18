@@ -95,14 +95,11 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
         };
 
 
-
-        console.error({ traceContext, meta });
-
         const headers = 
           KafkaHeaderBuilder.buildStandardHeaders({
             topic,
             operation,
-            trace: traceContext,
+            trace: effectiveTrace,
             version,
             service,
           });
