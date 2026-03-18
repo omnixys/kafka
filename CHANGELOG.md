@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [3.1.0](https://github.com/omnixys/kafka/compare/v3.0.0...v3.1.0) (2026-03-18)
+
+### Kafka-tracing
+
+* **Kafka-tracing:** replace manual trace propagation with OpenTelemetry W3C context ([](https://github.com/omnixys/kafka/commit/0c66af9262a89d113d3fdd27263d24edefa9a479))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/b3edd9e6cdb89bacbfa2813b959b222511283ac6))
+
 ## [3.0.0](https://github.com/omnixys/kafka/compare/v2.0.1...v3.0.0) (2026-03-18)
 
 ### Kafka
