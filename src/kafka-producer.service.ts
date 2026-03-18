@@ -12,7 +12,7 @@ import {
   OnModuleDestroy,
 } from "@nestjs/common";
 import type { Producer, ProducerRecord } from "kafkajs";
-import { context, trace, SpanKind } from "@opentelemetry/api";
+import { context, trace, SpanKind, propagation } from "@opentelemetry/api";
 
 import { KafkaHeaderBuilder } from "./kafka-header-builder.js";
 import { KAFKA_PRODUCER } from "./kafka.constants.js";
@@ -94,13 +94,22 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
         payload,
       };
 
-      const headers = KafkaHeaderBuilder.buildStandardHeaders({
-        topic,
-        operation,
-        trace: effectiveTrace,
-        version,
-        service,
-      });
+
+const carrier: Record<string, string> = {};
+
+// 🔥 DAS ist der wichtigste Call
+propagation.inject(context.active(), carrier);
+
+      const headers = {
+        ...carrier, 
+        ...KafkaHeaderBuilder.buildStandardHeaders({
+          topic,
+          operation,
+          trace: effectiveTrace,
+          version,
+          service,
+        }),
+      };
 
       console.debug("HEADERS", headers);
 

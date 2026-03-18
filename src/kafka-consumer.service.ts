@@ -23,7 +23,7 @@ import { KafkaEventContext } from "./kafka-event.interface.js";
 import { getAllKafkaTopics } from "./kafka-topics.js";
 
 import { KAFKA_CONSUMER } from "./kafka.constants.js";
-import { context, SpanKind, trace } from "@opentelemetry/api";
+import { context, propagation, ROOT_CONTEXT, SpanKind, trace } from "@opentelemetry/api";
 
 @Injectable()
 export class KafkaConsumerService
@@ -75,7 +75,13 @@ export class KafkaConsumerService
           const traceId = headers["x-trace-id"];
         const spanId = headers["x-span-id"];
         
-          let span;
+        let span;
+        
+                    const carrier = headers;
+
+                    // 🔥 DAS ist der Gamechanger
+                    const ctx = propagation.extract(ROOT_CONTEXT, carrier);
+
 
           if (traceId && spanId) {
             const remoteContext = trace.setSpanContext(context.active(), {
@@ -84,10 +90,20 @@ export class KafkaConsumerService
               traceFlags: 1,
             });
 
+
+
             span = tracer.startSpan(
               `kafka.consume.${topic}`,
-              { kind: SpanKind.CONSUMER },
-              remoteContext,
+              {
+                kind: SpanKind.CONSUMER,
+                attributes: {
+                  "messaging.system": "kafka",
+                  "messaging.destination": topic,
+                  "messaging.operation": "receive",
+                },
+              },
+              // remoteContext,
+              ctx,
             );
           } else {
             span = tracer.startSpan(`kafka.consume.${topic}`, {
@@ -97,7 +113,7 @@ export class KafkaConsumerService
         
         
           await context.with(
-            trace.setSpan(context.active(), span),
+            trace.setSpan(ctx, span),
             async () => {
               try {
                 const rawValue = message.value?.toString();
