@@ -61,6 +61,10 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
       version,
       payload,
     };
+
+    console.log("SEND TOPIC", topic);
+    console.log("SEND TOPIC TYPE", typeof topic);
+
     const headers = KafkaHeaderBuilder.buildStandardHeaders({
       topic,
       operation,
@@ -68,6 +72,12 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
       version,
       service,
     });
+
+console.log("HEADERS", headers);
+console.log(
+  "HEADER TYPES",
+  Object.fromEntries(Object.entries(headers).map(([k, v]) => [k, typeof v])),
+);
 
     const record: ProducerRecord = {
       topic,
