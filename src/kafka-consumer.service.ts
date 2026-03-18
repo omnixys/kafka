@@ -23,6 +23,7 @@ import { KafkaEventContext } from "./kafka-event.interface.js";
 import { getAllKafkaTopics } from "./kafka-topics.js";
 
 import { KAFKA_CONSUMER } from "./kafka.constants.js";
+import { context, SpanKind, trace } from "@opentelemetry/api";
 
 @Injectable()
 export class KafkaConsumerService
@@ -61,33 +62,76 @@ export class KafkaConsumerService
       eachMessage: async ({ topic, partition, message }) => {
         if (this.shutdownRequested) return;
 
-        const rawValue = message.value?.toString();
-
-        if (!rawValue) return;
-
-        try {
-          const payload = JSON.parse(rawValue);
-
-          const context: KafkaEventContext = {
-            topic,
-            partition,
-            offset: message.offset,
-            headers: Object.fromEntries(
-              Object.entries(message.headers ?? {}).map(([k, v]) => [
-                k,
-                v?.toString(),
-              ]),
-            ),
-            timestamp: message.timestamp,
-          };
-
-          await this.dispatcher.dispatch(topic, payload, context);
-        } catch (error) {
-          console.error(
-            `Kafka message processing error on topic ${topic}`,
-            error,
+          const headers = Object.fromEntries(
+            Object.entries(message.headers ?? {}).map(([k, v]) => [
+              k,
+              v?.toString(),
+            ]),
           );
-        }
+        
+        
+        const tracer = trace.getTracer("omnixys-kafka-consumer");
+        
+          const traceId = headers["x-trace-id"];
+        const spanId = headers["x-span-id"];
+        
+          let span;
+
+          if (traceId && spanId) {
+            const remoteContext = trace.setSpanContext(context.active(), {
+              traceId,
+              spanId,
+              traceFlags: 1,
+            });
+
+            span = tracer.startSpan(
+              `kafka.consume.${topic}`,
+              { kind: SpanKind.CONSUMER },
+              remoteContext,
+            );
+          } else {
+            span = tracer.startSpan(`kafka.consume.${topic}`, {
+              kind: SpanKind.CONSUMER,
+            });
+          }
+        
+        
+          await context.with(
+            trace.setSpan(context.active(), span),
+            async () => {
+              try {
+                const rawValue = message.value?.toString();
+
+                if (!rawValue) return;
+
+                try {
+                  const payload = JSON.parse(rawValue);
+
+                  const context: KafkaEventContext = {
+                    topic,
+                    partition,
+                    offset: message.offset,
+                    headers: Object.fromEntries(
+                      Object.entries(message.headers ?? {}).map(([k, v]) => [
+                        k,
+                        v?.toString(),
+                      ]),
+                    ),
+                    timestamp: message.timestamp,
+                  };
+
+                  await this.dispatcher.dispatch(topic, payload, context);
+                } catch (error) {
+                  console.error(
+                    `Kafka message processing error on topic ${topic}`,
+                    error,
+                  );
+                }
+              } finally {
+                span.end();
+              }
+            },
+          );
       },
     });
 

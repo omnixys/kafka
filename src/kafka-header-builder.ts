@@ -6,13 +6,18 @@
  * information to Kafka messages.
  */
 
+import { TraceContextDTO } from "@omnixys/shared";
 import { randomUUID } from "crypto";
 
 /**
  * Standard Kafka header keys used across the Omnixys platform.
  */
+
 export const KAFKA_HEADER_KEYS = {
   TRACE_ID: "x-trace-id",
+  SPAN_ID: "x-span-id",
+  PARENT_SPAN_ID: "x-parent-span-id",
+  SAMPLED: "x-sampled",
   EVENT_NAME: "x-event-name",
   EVENT_TYPE: "x-event-type",
   EVENT_VERSION: "x-event-version",
@@ -42,7 +47,7 @@ export class KafkaHeaderBuilder {
   }: {
     topic: string;
     operation?: string;
-    trace?: { traceId?: string };
+    trace?: TraceContextDTO;
     version?: string;
     service?: string;
   }): StandardKafkaHeaders {
@@ -52,6 +57,9 @@ export class KafkaHeaderBuilder {
       [KAFKA_HEADER_KEYS.EVENT_VERSION]: version,
       [KAFKA_HEADER_KEYS.SERVICE]: service,
       [KAFKA_HEADER_KEYS.TRACE_ID]: trace?.traceId ?? randomUUID(),
+      [KAFKA_HEADER_KEYS.SPAN_ID]: trace?.spanId ?? "",
+      [KAFKA_HEADER_KEYS.PARENT_SPAN_ID]: trace?.parentSpanId ?? "",
+      [KAFKA_HEADER_KEYS.SAMPLED]: trace?.sampled ?? "false",
     };
 
     return headers;

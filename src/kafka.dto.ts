@@ -1,4 +1,4 @@
-import { LogLevel, TraceContext } from "@omnixys/shared";
+import { LogLevel, TraceContextDTO } from "@omnixys/shared";
 import { KafkaTopics } from "./kafka-topics.js";
 
 
@@ -14,7 +14,7 @@ export interface LogDTO {
   service: string;
   operation: string;
   topic: LogstreamTopic;
-  traceContext?: TraceContext;
+  traceContext?: TraceContextDTO;
   timestamp: string;
   metadata?: Record<string, unknown>;
 }

@@ -12,11 +12,12 @@ import {
   OnModuleDestroy,
 } from "@nestjs/common";
 import type { Producer, ProducerRecord } from "kafkajs";
+import { context, trace, SpanKind } from "@opentelemetry/api";
 
 import { KafkaHeaderBuilder } from "./kafka-header-builder.js";
 import { KAFKA_PRODUCER } from "./kafka.constants.js";
 import { KafkaPayload, KafkaTopic } from "./kafka-event.types.js";
-import { TraceContext } from "@omnixys/shared";
+import { TraceContextDTO } from "@omnixys/shared";
 
 
 @Injectable()
@@ -48,52 +49,84 @@ export class KafkaProducerService implements OnModuleInit, OnModuleDestroy {
       version?: string;
       operation?: string;
     },
-    trace?: TraceContext,
+    traceContext?: TraceContextDTO,
   ): Promise<void> {
     if (this.isShuttingDown) return;
     if (!this.isReady) return;
 
-    const { service, version, operation } = meta;
+    const {
+      service = "unknown-service",
+      version = "v1",
+      operation = "unknown-operation",
+    } = meta;
 
-    const envelope = {
-      event: topic,
-      service,
-      version,
-      payload,
-    };
+    const tracer = trace.getTracer("omnixys-kafka-producer");
+    const activeCtx = context.active();
 
-    console.log("SEND TOPIC", topic);
-    console.log("SEND TOPIC TYPE", typeof topic);
-
-    const headers = KafkaHeaderBuilder.buildStandardHeaders({
-      topic,
-      operation,
-      trace,
-      version,
-      service,
-    });
-
-console.log("HEADERS", headers);
-console.log(
-  "HEADER TYPES",
-  Object.fromEntries(Object.entries(headers).map(([k, v]) => [k, typeof v])),
-);
-
-    const record: ProducerRecord = {
-      topic,
-      messages: [
-        {
-          value: JSON.stringify(envelope),
-          headers,
+    const span = tracer.startSpan(
+      `kafka.produce.${topic}`,
+      {
+        kind: SpanKind.PRODUCER,
+        attributes: {
+          "messaging.system": "kafka",
+          "messaging.destination.name": topic,
+          "messaging.operation": "publish",
+          "service.name": service,
+          "omnixys.operation": operation,
         },
-      ],
-    };
+      },
+      activeCtx,
+    );
+    try {
+      const spanCtx = span.spanContext();
 
-    await this.producer.send({
-      ...record,
-      acks: -1,
-      timeout: 5000,
-    });
+      const effectiveTrace: TraceContextDTO = {
+        traceId: spanCtx.traceId,
+        spanId: spanCtx.spanId,
+        parentSpanId: traceContext?.spanId,
+        sampled: String(spanCtx.traceFlags === 1),
+      };
+
+      const envelope = {
+        event: topic,
+        service,
+        version,
+        payload,
+      };
+
+      const headers = KafkaHeaderBuilder.buildStandardHeaders({
+        topic,
+        operation,
+        trace: effectiveTrace,
+        version,
+        service,
+      });
+
+      console.debug("HEADERS", headers);
+
+      const record: ProducerRecord = {
+        topic,
+        messages: [
+          {
+            value: JSON.stringify(envelope),
+            headers,
+          },
+        ],
+      };
+
+      await context.with(trace.setSpan(activeCtx, span), async () => {
+        await this.producer.send({
+          ...record,
+          acks: -1,
+          timeout: 5000,
+        });
+      });
+    } catch (error) {
+      span.recordException(error as Error);
+      throw error;
+    } finally {
+      span.end();
+    }
   }
 
   /**

@@ -13,10 +13,13 @@ importers:
         version: 11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@omnixys/graphql':
         specifier: ^3.0.0
-        version: 3.0.0(@nestjs/graphql@13.2.4(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-validator@0.15.1)(graphql@16.13.1)(reflect-metadata@0.2.2))(@omnixys/contracts@1.9.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@omnixys/shared@2.0.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(class-validator@0.15.1)
+        version: 3.0.1(@nestjs/graphql@13.2.4(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-validator@0.15.1)(graphql@16.13.1)(reflect-metadata@0.2.2))(@omnixys/contracts@1.9.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@omnixys/shared@2.0.1(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(class-validator@0.15.1)
       '@omnixys/shared':
         specifier: ^2.0.0
-        version: 2.0.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+        version: 2.0.1(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+      '@opentelemetry/api':
+        specifier: ^1.9.0
+        version: 1.9.0
       kafkajs:
         specifier: ^2.2.4
         version: 2.2.4
@@ -334,8 +337,8 @@ packages:
     peerDependencies:
       '@nestjs/common': ^11.0.0
 
-  '@omnixys/graphql@3.0.0':
-    resolution: {integrity: sha512-PqFlGe1qM7KnKP5vVxWMaDwmVsuD3HTmaudJu1ABsh+chTCa4xYGnonUxRvtMrBq+u4Fz7RarRCWDusEhhigcg==, tarball: https://npm.pkg.github.com/download/@omnixys/graphql/3.0.0/fddd922074e690c825c26520c4ed813a53cb5ee8}
+  '@omnixys/graphql@3.0.1':
+    resolution: {integrity: sha512-MB1wPNm5RqbksZKuYwSPRseVPbQ0oFkGCnuWMZwxAZzvTHBiw+eKZH+IikLgL6+oBvMTI6lD31FqgfPwfZW6Kw==, tarball: https://npm.pkg.github.com/download/@omnixys/graphql/3.0.1/cc63606ccbe2bd5acbe69530c07472d50a2ecde9}
     engines: {node: '>=20'}
     peerDependencies:
       '@nestjs/graphql': ^13.2.4
@@ -343,10 +346,14 @@ packages:
       '@omnixys/shared': ^2.0.0
       class-validator: ^0.15.1
 
-  '@omnixys/shared@2.0.0':
-    resolution: {integrity: sha512-s3USRf8k4heVQptTkl6iHycTInC3HZ2BPrJM2GrVW+sgxAYMfirmGqF6wUOxRuRpjgut6vU2Q8WsBwWV7lNo/Q==, tarball: https://npm.pkg.github.com/download/@omnixys/shared/2.0.0/b2d05441f176e80df53609882edf762280f1f36a}
+  '@omnixys/shared@2.0.1':
+    resolution: {integrity: sha512-9UCTlew1zcgrc8JHDfvIskSY7a81XhPMq92z4Tpkn1K7Q7ktMjs4wSUlr5UbWloRmxtAM2m+7iMeTaXeyY3dWQ==, tarball: https://npm.pkg.github.com/download/@omnixys/shared/2.0.1/67597654670b4a697f125f29573ff9e269fc9f8e}
     peerDependencies:
       '@nestjs/common': ^11.0.0
+
+  '@opentelemetry/api@1.9.0':
+    resolution: {integrity: sha512-3giAOQvZiH5F9bMlMiv8+GSPMeqg0dbaeo58/0SlA9sxSqZhnUtxzX9/2FzyhS9sWQf5S0GJE0AKBrFqjpeYcg==}
+    engines: {node: '>=8.0.0'}
 
   '@pnpm/config.env-replace@1.1.0':
     resolution: {integrity: sha512-htyl8TWnKL7K/ESFa1oW2UB5lVDxuF5DpM7tBi6Hu2LNL3mWkIzNLG6N4zoCUP1lCKNxWy/3iu8mS8MvToGd6w==}
@@ -2213,17 +2220,19 @@ snapshots:
       '@nestjs/common': 11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       jose: 6.2.1
 
-  '@omnixys/graphql@3.0.0(@nestjs/graphql@13.2.4(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-validator@0.15.1)(graphql@16.13.1)(reflect-metadata@0.2.2))(@omnixys/contracts@1.9.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@omnixys/shared@2.0.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(class-validator@0.15.1)':
+  '@omnixys/graphql@3.0.1(@nestjs/graphql@13.2.4(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-validator@0.15.1)(graphql@16.13.1)(reflect-metadata@0.2.2))(@omnixys/contracts@1.9.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@omnixys/shared@2.0.1(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)))(class-validator@0.15.1)':
     dependencies:
       '@nestjs/graphql': 13.2.4(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-validator@0.15.1)(graphql@16.13.1)(reflect-metadata@0.2.2)
       '@omnixys/contracts': 1.9.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
-      '@omnixys/shared': 2.0.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
+      '@omnixys/shared': 2.0.1(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))
       class-validator: 0.15.1
 
-  '@omnixys/shared@2.0.0(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))':
+  '@omnixys/shared@2.0.1(@nestjs/common@11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2))':
     dependencies:
       '@nestjs/common': 11.1.16(class-validator@0.15.1)(reflect-metadata@0.2.2)(rxjs@7.8.2)
       jose: 6.2.1
+
+  '@opentelemetry/api@1.9.0': {}
 
   '@pnpm/config.env-replace@1.1.0': {}
 

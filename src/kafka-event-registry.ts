@@ -15,8 +15,6 @@ import {
   CreateSeatDTO,
   SendMagicLinkDTO,
   SendResetLinkDTO,
-  LogLevel,
-  TraceContext,
 } from "@omnixys/shared";
 import { LogDTO } from "./kafka.dto.js";
 
