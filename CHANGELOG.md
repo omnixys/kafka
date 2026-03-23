@@ -3,6 +3,65 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.0](https://github.com/omnixys/kafka/compare/v3.1.8...v4.0.0) (2026-03-23)
+
+### ⚠ BREAKING CHANGE
+
+* **Kafka:** complete redesign of Kafka package architecture
+removed all direct OpenTelemetry usage from Kafka layer
+Kafka is now fully decoupled from tracing implementation
+introduced transport-agnostic HeaderCarrier abstraction
+replaced Record-based header propagation with carrier pattern
+🚀 New Architecture
+added KafkaEventDispatcherService with automatic handler discovery (NestJS DiscoveryModule)
+introduced decorator-based event handling:
+@KafkaHandler()
+@KafkaEvent(...topics)
+added strongly typed KafkaEnvelope
+added topic registry support
+clean separation between producer, consumer, dispatcher
+🔥 Observability Integration
+Kafka no longer imports @opentelemetry/*
+tracing handled exclusively via @omnixys/observability
+introduced W3CPropagator with carrier support
+implemented KafkaHeaderCarrier as bridge for Kafka headers
+removed KafkaPropagator (no longer needed)
+⚠️ Breaking Changes
+removed:
+KafkaPropagator
+direct propagation.inject/extract usage
+all OpenTelemetry imports in Kafka package
+producer API changed:
+now requires KafkaEnvelope instead of raw payload
+consumer context handling changed:
+now uses propagated trace context via carrier
+🧱 Infrastructure
+introduced kafkaBootstrapProviders (client, producer, consumer lifecycle)
+proper async provider initialization (connect on bootstrap)
+added clean shutdown handling
+📦 Headers
+replaced Record<string, Buffer> usage with KafkaHeaderCarrier abstraction
+added toKafkaHeaders() for KafkaJS compatibility
+ensured compatibility with observability propagator
+🧠 Design Improvements
+no global mutable state
+no side effects in constructors
+lifecycle fully managed by NestJS
+improved type safety across dispatcher and handlers
+🧪 Internal
+removed duplicate implementations
+unified producer/consumer logic
+cleaned up legacy code paths
+improved module structure and exports
+
+### Kafka
+
+* **Kafka:** introduce v4 architecture with observability decoupling and header carrier abstraction ([](https://github.com/omnixys/kafka/commit/ef7fb8a340db31d08ef060fa08457190c12bb09a))
+
+### Release
+
+* **Release:** update Release Workflow ([](https://github.com/omnixys/kafka/commit/a860aed99f6f68dde2c7cca1b0e5e78a8ef8d40d))
+
 ## [3.1.8](https://github.com/omnixys/kafka/compare/v3.1.7...v3.1.8) (2026-03-18)
 
 ### U
