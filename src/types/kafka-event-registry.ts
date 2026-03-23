@@ -4,8 +4,7 @@
  * Maps Kafka topics to their payload types.
  */
 
-import { EventAddressInput } from "@omnixys/graphql";
-import { KafkaTopics } from "./kafka-topics.js";
+// import { EventAddressInput } from "@omnixys/graphql";
 import {
   AddUserIdDTO,
   CreateUserAddressDTO,
@@ -16,13 +15,13 @@ import {
   SendMagicLinkDTO,
   SendResetLinkDTO,
 } from "@omnixys/shared";
-import { LogDTO } from "./kafka.dto.js";
+import { KafkaTopics } from "../kafka-topics";
 
 /**
  * Event payload definitions
  */
 export interface KafkaEventRegistry {
-  [KafkaTopics.address.createEventAddress]: EventAddressInput;
+  // [KafkaTopics.address.createEventAddress]: EventAddressInput;
   [KafkaTopics.address.deleteEventAddress]: EventActionDTO;
   [KafkaTopics.address.createUserAddresses]: CreateUserAddressDTO;
   [KafkaTopics.address.deleteUserAddresses]: UserActionDTO;
@@ -41,17 +40,17 @@ export interface KafkaEventRegistry {
   [KafkaTopics.invitation.restart]: UserActionDTO;
   [KafkaTopics.invitation.shutdown]: UserActionDTO;
 
-  [KafkaTopics.logstream.address]: LogDTO;
-  [KafkaTopics.logstream.admin]: LogDTO;
-  [KafkaTopics.logstream.authentication]: LogDTO;
-  [KafkaTopics.logstream.event]: LogDTO;
-  [KafkaTopics.logstream.invitation]: LogDTO;
-  [KafkaTopics.logstream.notification]: LogDTO;
-  [KafkaTopics.logstream.seat]: LogDTO;
-  [KafkaTopics.logstream.ticket]: LogDTO;
-  [KafkaTopics.logstream.user]: LogDTO;
-  [KafkaTopics.logstream.restart]: LogDTO;
-  [KafkaTopics.logstream.shutdown]: LogDTO;
+  // [KafkaTopics.logstream.address]: LogDTO;
+  // [KafkaTopics.logstream.admin]: LogDTO;
+  // [KafkaTopics.logstream.authentication]: LogDTO;
+  // [KafkaTopics.logstream.event]: LogDTO;
+  // [KafkaTopics.logstream.invitation]: LogDTO;
+  // [KafkaTopics.logstream.notification]: LogDTO;
+  // [KafkaTopics.logstream.seat]: LogDTO;
+  // [KafkaTopics.logstream.ticket]: LogDTO;
+  // [KafkaTopics.logstream.user]: LogDTO;
+  // [KafkaTopics.logstream.restart]: LogDTO;
+  // [KafkaTopics.logstream.shutdown]: LogDTO;
 
   [KafkaTopics.notification.sendCredentials]: string;
   [KafkaTopics.notification.sendRequestReset]: SendResetLinkDTO;

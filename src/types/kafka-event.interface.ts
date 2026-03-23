@@ -14,7 +14,7 @@
  * Metadata attached to a Kafka message when delivered to a handler.
  * This contains transport-level information coming from Kafka.
  */
-export interface KafkaEventContext {
+export interface IKafkaEventContext {
   /**
    * Kafka topic name
    */
@@ -46,14 +46,14 @@ export interface KafkaEventContext {
  *
  * Base interface for class-based Kafka handlers.
  */
-export interface KafkaEventHandler {
+export interface IKafkaEventHandler {
   /**
    * Called when a Kafka message is received.
    */
   handle(
     topic: string,
     payload: unknown,
-    context: KafkaEventContext,
+    context: IKafkaEventContext,
   ): Promise<void>;
 }
 
@@ -62,8 +62,8 @@ export interface KafkaEventHandler {
  *
  * Function-based handler signature.
  */
-export type KafkaEventHandlerFn = (
+export type KafkaEventHandlerType = (
   topic: string,
   payload: unknown,
-  context: KafkaEventContext,
+  context: IKafkaEventContext,
 ) => Promise<void> | void;

@@ -1,17 +1,21 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+
     "declaration": true,
+    "declarationMap": true,
+
+    "rootDir": "./src",
     "outDir": "dist",
-    "rootDir": "src",
     "strict": true,
+
     "esModuleInterop": true,
     "skipLibCheck": true,
 
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true
   },
   "include": ["src"]
 }

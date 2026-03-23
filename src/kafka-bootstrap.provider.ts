@@ -8,14 +8,8 @@
 
 import type { Provider } from "@nestjs/common";
 import type { Consumer, Kafka, Producer } from "kafkajs";
-
-import { createKafkaClient, KafkaModuleOptions } from "./kafka.config.js";
-import {
-  KAFKA_CONSUMER,
-  KAFKA_INSTANCE,
-  KAFKA_OPTIONS,
-  KAFKA_PRODUCER,
-} from "./kafka.constants.js";
+import { createKafkaClient } from "./client/kafka.factory";
+import { KAFKA_INSTANCE, KAFKA_OPTIONS, KafkaModuleOptions, KAFKA_PRODUCER, KAFKA_CONSUMER } from "./core";
 
 /**
  * Kafka client provider.
