@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.2.0](https://github.com/omnixys/kafka/compare/v4.1.0...v4.2.0) (2026-03-24)
+
+### Producer
+
+* **Producer:** add payload ([](https://github.com/omnixys/kafka/commit/0610dc75e40be476070b9d72f525df10e3e034ed))
+
 ## [4.1.0](https://github.com/omnixys/kafka/compare/v4.0.1...v4.1.0) (2026-03-24)
 
 ### KafkaHeaders
