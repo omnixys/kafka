@@ -15,11 +15,13 @@ export class KafkaProducerService {
 
   async send<T>(
     topic: string,
-    envelope: KafkaEnvelope<T>,
+    payload: T,
     meta: {
       service?: string;
       version?: string;
       class?: string;
+      operation?: string;
+      type?: string;
     },
   ): Promise<void> {
     const kafkaHeaders = createKafkaHeaders();
@@ -34,6 +36,16 @@ export class KafkaProducerService {
       ...kafkaHeaders,
       meta,
     });
+
+    const envelope: KafkaEnvelope<T> = {
+      eventId: crypto.randomUUID(),
+      eventName: topic,
+      eventVersion: meta.version ?? "1",
+      service: meta.service ?? "UKNOWN SERVICE",
+      operation: meta.operation ?? "UKNOWN OPERATION",
+      timestamp: new Date().toISOString(),
+      payload,
+    };
 
     await this.producer.send({
       topic,

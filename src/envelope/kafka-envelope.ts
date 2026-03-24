@@ -6,5 +6,4 @@ export interface KafkaEnvelope<T = any> {
   operation: string;
   timestamp: string;
   payload: T;
-  metadata: Record<string, string>;
 }
