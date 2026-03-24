@@ -1,6 +1,6 @@
-import { Injectable, OnModuleInit } from "@nestjs/common";
-import { DiscoveryService, MetadataScanner, Reflector } from "@nestjs/core";
-import { KAFKA_HANDLER, KAFKA_EVENT_METADATA } from "../core";
+import { Injectable, type OnModuleInit } from "@nestjs/common";
+import type { DiscoveryService, MetadataScanner, Reflector } from "@nestjs/core";
+import { KAFKA_EVENT_METADATA, KAFKA_HANDLER } from "../core";
 
 interface HandlerEntry {
   instance: any;
@@ -33,10 +33,7 @@ export class KafkaEventDispatcherService implements OnModuleInit {
       this.scanner.getAllMethodNames(prototype).forEach((methodName) => {
         const methodRef = prototype[methodName];
 
-        const metadata = this.reflector.get<{ topics: string[] }>(
-          KAFKA_EVENT_METADATA,
-          methodRef,
-        );
+        const metadata = this.reflector.get<{ topics: string[] }>(KAFKA_EVENT_METADATA, methodRef);
 
         if (!metadata) return;
 

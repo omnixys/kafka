@@ -1,4 +1,4 @@
-import { HeaderCarrier } from "@omnixys/observability";
+import type { HeaderCarrier } from "@omnixys/observability";
 
 export class KafkaHeaderCarrier implements HeaderCarrier {
   constructor(private readonly headers: Record<string, Buffer>) {}

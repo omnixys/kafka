@@ -1,5 +1,5 @@
-import { LogLevel, TraceContextDTO } from "@omnixys/shared";
-import { KafkaTopics } from "./types/kafka-topics.js";
+import type { LogLevel, TraceContextDTO } from "@omnixys/shared";
+import type { KafkaTopics } from "./types/kafka-topics.js";
 
 type DeepValueOf<T> = T extends object ? DeepValueOf<T[keyof T]> : T;
 

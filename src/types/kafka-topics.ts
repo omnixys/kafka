@@ -9,7 +9,6 @@
  * consistent and type-safe.
  */
 
-
 /**
  * Global Kafka topic registry.
  *
@@ -48,7 +47,7 @@ export const KafkaTopics = {
   },
   logstream: {
     authentication: "authentication.send.logstream",
-        address: "address.send.logstream",
+    address: "address.send.logstream",
     admin: "admin.send.logstream",
     event: "event.send.logstream",
     notification: "notification.send.logstream",
@@ -56,7 +55,7 @@ export const KafkaTopics = {
     invitation: `invitation.log.logstream`,
     seat: "seat.send.logstream",
     user: "user.send.logstream",
-        restart: `admin.restart.logstream`,
+    restart: `admin.restart.logstream`,
     shutdown: `admin.shutdown.logstream`,
   },
   notification: {
@@ -98,9 +97,7 @@ export type KafkaTopicsType = typeof KafkaTopics;
 export function getAllKafkaTopics(): string[] {
   const flatten = (obj: Record<string, unknown>): string[] =>
     Object.values(obj).flatMap((value) =>
-      typeof value === 'string'
-        ? [value]
-        : flatten(value as Record<string, unknown>),
+      typeof value === "string" ? [value] : flatten(value as Record<string, unknown>),
     );
 
   return flatten(KafkaTopics);
@@ -112,9 +109,9 @@ export function getAllKafkaTopics(): string[] {
  * Example:
  * getTopic('invitation', 'deleteInvitation')
  */
-export function getTopic<
-  D extends keyof KafkaTopicsType,
-  K extends keyof KafkaTopicsType[D],
->(domain: D, key: K): KafkaTopicsType[D][K] {
+export function getTopic<D extends keyof KafkaTopicsType, K extends keyof KafkaTopicsType[D]>(
+  domain: D,
+  key: K,
+): KafkaTopicsType[D][K] {
   return KafkaTopics[domain][key];
 }

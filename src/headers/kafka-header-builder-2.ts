@@ -6,7 +6,7 @@
  * information to Kafka messages.
  */
 
-import { TraceContextDTO } from "@omnixys/shared";
+import type { TraceContextDTO } from "@omnixys/shared";
 import { randomUUID } from "crypto";
 
 /**

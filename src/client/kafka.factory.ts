@@ -1,5 +1,5 @@
 import { Kafka, logLevel } from "kafkajs";
-import { KafkaModuleOptions } from "../core/kafka.options";
+import type { KafkaModuleOptions } from "../core/kafka.options";
 
 export function createKafkaClient(options: KafkaModuleOptions) {
   return new Kafka({

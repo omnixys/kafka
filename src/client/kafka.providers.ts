@@ -1,21 +1,20 @@
 import type { Provider } from "@nestjs/common";
-import type { Kafka, Producer, Consumer } from "kafkajs";
+import type { Consumer, Kafka, Producer } from "kafkajs";
 
 import {
   KAFKA_CLIENT,
+  KAFKA_CONSUMER,
   KAFKA_OPTIONS,
   KAFKA_PRODUCER,
-  KAFKA_CONSUMER,
 } from "../core/kafka.constants";
-import { KafkaModuleOptions } from "../core/kafka.options";
+import type { KafkaModuleOptions } from "../core/kafka.options";
 import { createKafkaClient } from "./kafka.factory";
 
 export const kafkaBootstrapProviders: Provider[] = [
   {
     provide: KAFKA_CLIENT,
     inject: [KAFKA_OPTIONS],
-    useFactory: (options: KafkaModuleOptions): Kafka =>
-      createKafkaClient(options),
+    useFactory: (options: KafkaModuleOptions): Kafka => createKafkaClient(options),
   },
   {
     provide: KAFKA_PRODUCER,
@@ -29,10 +28,7 @@ export const kafkaBootstrapProviders: Provider[] = [
   {
     provide: KAFKA_CONSUMER,
     inject: [KAFKA_CLIENT, KAFKA_OPTIONS],
-    useFactory: async (
-      kafka: Kafka,
-      options: KafkaModuleOptions,
-    ): Promise<Consumer> => {
+    useFactory: async (kafka: Kafka, options: KafkaModuleOptions): Promise<Consumer> => {
       const consumer = kafka.consumer({ groupId: options.groupId });
       await consumer.connect();
       return consumer;

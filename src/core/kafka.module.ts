@@ -1,13 +1,11 @@
-import { Global, Module, DynamicModule } from "@nestjs/common";
+import { type DynamicModule, Global, Module } from "@nestjs/common";
 import { DiscoveryModule } from "@nestjs/core";
-
-import { KafkaModuleOptions } from "./kafka.options";
-import { KAFKA_OPTIONS } from "./kafka.constants";
-
-import { KafkaProducerService } from "../producer/kafka-producer.service";
 import { KafkaConsumerService } from "../consumer/kafka-consumer.service";
-import { kafkaBootstrapProviders } from "../kafka-bootstrap.provider";
 import { KafkaEventDispatcherService } from "../dispatcher/kafka-event-dispatcher.service";
+import { kafkaBootstrapProviders } from "../kafka-bootstrap.provider";
+import { KafkaProducerService } from "../producer/kafka-producer.service";
+import { KAFKA_OPTIONS } from "./kafka.constants";
+import type { KafkaModuleOptions } from "./kafka.options";
 
 @Global()
 @Module({})

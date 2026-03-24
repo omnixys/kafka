@@ -5,7 +5,7 @@
  */
 
 // import { EventAddressInput } from "@omnixys/graphql";
-import {
+import type {
   AddUserIdDTO,
   CreateSeatDTO,
   CreateUserAddressDTO,

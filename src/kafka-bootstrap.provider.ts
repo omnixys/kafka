@@ -9,7 +9,13 @@
 import type { Provider } from "@nestjs/common";
 import type { Consumer, Kafka, Producer } from "kafkajs";
 import { createKafkaClient } from "./client/kafka.factory";
-import { KAFKA_INSTANCE, KAFKA_OPTIONS, KafkaModuleOptions, KAFKA_PRODUCER, KAFKA_CONSUMER } from "./core";
+import {
+  KAFKA_CONSUMER,
+  KAFKA_INSTANCE,
+  KAFKA_OPTIONS,
+  KAFKA_PRODUCER,
+  type KafkaModuleOptions,
+} from "./core";
 
 /**
  * Kafka client provider.
@@ -39,10 +45,7 @@ export const kafkaProducerProvider: Provider = {
 export const kafkaConsumerProvider: Provider = {
   provide: KAFKA_CONSUMER,
   inject: [KAFKA_INSTANCE, KAFKA_OPTIONS],
-  useFactory: async (
-    kafka: Kafka,
-    options: KafkaModuleOptions,
-  ): Promise<Consumer> => {
+  useFactory: async (kafka: Kafka, options: KafkaModuleOptions): Promise<Consumer> => {
     const consumer = kafka.consumer({
       groupId: options.groupId,
     });

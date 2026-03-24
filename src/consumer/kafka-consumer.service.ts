@@ -1,15 +1,8 @@
-import {
-  Inject,
-  Injectable,
-  OnModuleInit,
-  OnModuleDestroy,
-} from "@nestjs/common";
-import type { Consumer } from "kafkajs";
-
-import { KAFKA_CONSUMER } from "../core/kafka.constants";
-import { KafkaEventDispatcherService } from "../dispatcher/kafka-event-dispatcher.service";
-
+import { Inject, Injectable, type OnModuleDestroy, type OnModuleInit } from "@nestjs/common";
 import { W3CPropagator } from "@omnixys/observability";
+import type { Consumer } from "kafkajs";
+import { KAFKA_CONSUMER } from "../core/kafka.constants";
+import type { KafkaEventDispatcherService } from "../dispatcher/kafka-event-dispatcher.service";
 import { KafkaHeaderCarrier } from "../headers/kafka-header-carrier";
 
 @Injectable()
@@ -46,10 +39,7 @@ export class KafkaConsumerService implements OnModuleInit, OnModuleDestroy {
           partition,
           offset: message.offset,
           headers: Object.fromEntries(
-            Object.entries(message.headers ?? {}).map(([k, v]) => [
-              k,
-              v?.toString(),
-            ]),
+            Object.entries(message.headers ?? {}).map(([k, v]) => [k, v?.toString()]),
           ),
           timestamp: message.timestamp,
           traceContext: context,

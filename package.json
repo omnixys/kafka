@@ -49,6 +49,7 @@
   ],
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.4.2",
     "@nestjs/core": "^11.1.17",
