@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.1.0](https://github.com/omnixys/kafka/compare/v4.0.1...v4.1.0) (2026-03-24)
+
+### KafkaHeaders
+
+* **KafkaHeaders:** update Kafka Headers ([](https://github.com/omnixys/kafka/commit/31b5c4ecd5697677ba89e038589b7d06fd342945))
+
 ## [4.0.1](https://github.com/omnixys/kafka/compare/v4.0.0...v4.0.1) (2026-03-24)
 
 ### Topics
