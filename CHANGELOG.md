@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.0.1](https://github.com/omnixys/kafka/compare/v4.0.0...v4.0.1) (2026-03-24)
+
+### Topics
+
+* **Topics:** add Kafka topics ([](https://github.com/omnixys/kafka/commit/073d7b283a649a04ac746c56b99b797642c561a6))
+
 ## [4.0.0](https://github.com/omnixys/kafka/compare/v3.1.8...v4.0.0) (2026-03-23)
 
 ### ⚠ BREAKING CHANGE
