@@ -7,15 +7,15 @@
 // import { EventAddressInput } from "@omnixys/graphql";
 import {
   AddUserIdDTO,
+  CreateSeatDTO,
   CreateUserAddressDTO,
   CreateUserProviderDTO,
   EventActionDTO,
-  UserActionDTO,
-  CreateSeatDTO,
   SendMagicLinkDTO,
   SendResetLinkDTO,
+  UserActionDTO,
 } from "@omnixys/shared";
-import { KafkaTopics } from "../kafka-topics";
+import { KafkaTopics } from "./kafka-topics";
 
 /**
  * Event payload definitions
