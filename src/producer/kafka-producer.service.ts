@@ -5,6 +5,8 @@ import { KAFKA_PRODUCER } from "../core/kafka.constants";
 import type { KafkaEnvelope } from "../envelope/kafka-envelope";
 
 import { createKafkaHeaders } from "../headers/kafka-header-builder";
+import { KafkaEventRegistry } from "../types/kafka-event-registry";
+import { KafkaEventType, KafkaTopic } from "../types/kafka-event.types.js";
 
 @Injectable()
 export class KafkaProducerService {
@@ -13,17 +15,8 @@ export class KafkaProducerService {
     private readonly producer: Producer,
   ) {}
 
-  async send<T>(
-    topic: string,
-    payload: T,
-    meta: {
-      service?: string;
-      version?: string;
-      class?: string;
-      operation?: string;
-      type?: string;
-    },
-  ): Promise<void> {
+  async send<T extends KafkaTopic>(input: KafkaEventType<T>): Promise<void> {
+    const { topic, payload, meta } = input;
     const kafkaHeaders = createKafkaHeaders();
 
     const traceContext = TraceContextExtractor.current();
@@ -32,12 +25,16 @@ export class KafkaProducerService {
       new W3CPropagator().inject(kafkaHeaders);
     }
 
+    // headers["x-meta-service"] = meta.service ?? "unknown-service";
+    // headers["x-meta-version"] = meta.version ?? "1";
+    // headers["x-meta-operation"] = meta.operation ?? "unknown-operation";
+
     const headers = JSON.stringify({
       ...kafkaHeaders,
       meta,
     });
 
-    const envelope: KafkaEnvelope<T> = {
+    const envelope: KafkaEnvelope<KafkaEventRegistry[T]> = {
       eventId: crypto.randomUUID(),
       eventName: topic,
       eventVersion: meta.version ?? "1",
