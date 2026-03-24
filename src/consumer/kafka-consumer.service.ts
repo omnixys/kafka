@@ -2,7 +2,7 @@ import { Inject, Injectable, type OnModuleDestroy, type OnModuleInit } from "@ne
 import { W3CPropagator } from "@omnixys/observability";
 import type { Consumer } from "kafkajs";
 import { KAFKA_CONSUMER } from "../core/kafka.constants";
-import type { KafkaEventDispatcherService } from "../dispatcher/kafka-event-dispatcher.service";
+import { KafkaEventDispatcherService } from "../dispatcher/kafka-event-dispatcher.service";
 import { KafkaHeaderCarrier } from "../headers/kafka-header-carrier";
 
 @Injectable()
