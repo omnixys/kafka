@@ -3,6 +3,20 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.3.0](https://github.com/omnixys/kafka/compare/v4.2.0...v4.3.0) (2026-03-24)
+
+### ⚠ BREAKING CHANGE
+
+* **Kafka:** KafkaProducerService.send signature changed to accept KafkaEvent<T> instead of separate topic and payload arguments
+
+### Kafka
+
+* **Kafka:** introduce strongly typed event system with topic-payload mapping ([](https://github.com/omnixys/kafka/commit/4534262da7a2931c36cd9bf41c4277843d7b3ca5))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/c5522c43a0a51ee246c5a7fbbc89dd0a755083a8))
+
 ## [4.2.0](https://github.com/omnixys/kafka/compare/v4.1.0...v4.2.0) (2026-03-24)
 
 ### Producer
