@@ -1,5 +1,5 @@
 import { Injectable, type OnModuleInit } from "@nestjs/common";
-import type { DiscoveryService, MetadataScanner, Reflector } from "@nestjs/core";
+import { DiscoveryService, MetadataScanner, Reflector } from "@nestjs/core";
 import { KAFKA_EVENT_METADATA, KAFKA_HANDLER } from "../core";
 
 interface HandlerEntry {
