@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [4.3.1](https://github.com/omnixys/kafka/compare/v4.3.0...v4.3.1) (2026-03-24)
+
+### Observability
+
+* **Observability:** resolve NestJS DI failure caused by type-only import ([](https://github.com/omnixys/kafka/commit/f8ab11549fbeec69613602ef13f9b0c34a58dd6e))
+
 ## [4.3.0](https://github.com/omnixys/kafka/compare/v4.2.0...v4.3.0) (2026-03-24)
 
 ### ⚠ BREAKING CHANGE
