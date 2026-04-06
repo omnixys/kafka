@@ -50,7 +50,11 @@ export interface IKafkaEventHandler {
   /**
    * Called when a Kafka message is received.
    */
-  handle(topic: string, payload: unknown, context: IKafkaEventContext): Promise<void>;
+  handle(
+    topic: string,
+    payload: unknown,
+    context: IKafkaEventContext
+  ): Promise<void>;
 }
 
 /**

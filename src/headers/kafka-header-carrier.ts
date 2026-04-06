@@ -1,6 +1,6 @@
 import type { HeaderCarrier } from "@omnixys/observability";
 
-export class KafkaHeaderCarrier implements HeaderCarrier {
+export class KafkaCarrier implements HeaderCarrier {
   constructor(private readonly headers: Record<string, Buffer>) {}
 
   get(key: string): string | undefined {
@@ -9,6 +9,10 @@ export class KafkaHeaderCarrier implements HeaderCarrier {
 
   set(key: string, value: string): void {
     this.headers[key] = Buffer.from(value);
+  }
+
+  keys(): string[] {
+    return Object.keys(this.headers);
   }
 
   toKafkaHeaders(): Record<string, Buffer> {

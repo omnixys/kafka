@@ -27,60 +27,81 @@ export const KafkaTopics = {
     createUserAddresses: "authentication.create.addresses",
     deleteUserAddresses: "authentication.delete.addresses",
   },
+
   admin: {
     allRestart: "all.restart.admin",
     allShutdown: "all.shutdown.admin",
   },
+
   authentication: {
     restart: `admin.restart.authentication`,
     shutdown: `admin.shutdown.authentication`,
   },
+
   event: {
     restart: `admin.restart.event`,
     shutdown: `admin.shutdown.event`,
+
+    addRole: "authentication.addRole.event",
+    removeRoles: "authentication.removeRole.event",
   },
+
+  gateway: {
+    restart: `admin.restart.gateway`,
+    shutdown: `admin.shutdown.gateway`,
+
+    sendCredentials: "notification.sendCredentials.gateway",
+  },
+
   invitation: {
     restart: `admin.restart.invitation`,
     shutdown: `admin.shutdown.invitation`,
-    deleteInvitations: `user.delete.invitation`,
-    addGuestId: `user.addGuestId.invitation`,
+    deleteInvitations: `authentication.delete.invitation`,
+    addGuestId: `ticket.addGuestId.invitation`,
   },
+
   logstream: {
-    authentication: "authentication.send.logstream",
-    address: "address.send.logstream",
-    admin: "admin.send.logstream",
-    event: "event.send.logstream",
-    notification: "notification.send.logstream",
-    ticket: "ticket.send.logstream",
-    invitation: `invitation.log.logstream`,
-    seat: "seat.send.logstream",
-    user: "user.send.logstream",
+    log: "logstream.log",
     restart: `admin.restart.logstream`,
     shutdown: `admin.shutdown.logstream`,
   },
+
   notification: {
     restart: `admin.restart.notification`,
     shutdown: `admin.shutdown.notification`,
-    sendCredentials: "authentication.sendCredentials.notification",
+    // sendCredentials: "authentication.sendCredentials.notification",
     sendRequestReset: "authentication.sendRequestReset.notification",
     sendMagicLink: "authentication.sendMagicLink.notification",
-    createUser: `user.notifyRegisttration.notification`,
+
+    confirmGuest: "invitation.confirmGuest.notification",
+    notifyUser: `authentication.notifyRegistration.notification`,
   },
+
   seat: {
     restart: `admin.restart.seat`,
     shutdown: `admin.shutdown.seat`,
+
     create: "event.create.seat",
     delete: "event.delete.seat",
+
+    addGuestId: `user.addGuestId.seat`,
+    deleteGuestId: `user.deleteGuestId.seat`,
   },
+
   ticket: {
     restart: `admin.restart.ticket`,
     shutdown: `admin.shutdown.ticket`,
+
+    deleteTickets: `authentication.delete.ticket`,
+    create: `authentication.create.ticket`,
   },
+
   user: {
     restart: `admin.restart.user`,
     shutdown: `admin.shutdown.user`,
     deleteUser: "authentication.delete.user",
-    addId: "authentication.id.user",
+    createUser: "authentication.create.user",
+    createGuest: "authentication.createGuest.user",
     createProviderUser: "authentication.provider.user",
   },
 } as const;
@@ -97,7 +118,9 @@ export type KafkaTopicsType = typeof KafkaTopics;
 export function getAllKafkaTopics(): string[] {
   const flatten = (obj: Record<string, unknown>): string[] =>
     Object.values(obj).flatMap((value) =>
-      typeof value === "string" ? [value] : flatten(value as Record<string, unknown>),
+      typeof value === "string"
+        ? [value]
+        : flatten(value as Record<string, unknown>),
     );
 
   return flatten(KafkaTopics);
@@ -109,9 +132,9 @@ export function getAllKafkaTopics(): string[] {
  * Example:
  * getTopic('invitation', 'deleteInvitation')
  */
-export function getTopic<D extends keyof KafkaTopicsType, K extends keyof KafkaTopicsType[D]>(
-  domain: D,
-  key: K,
-): KafkaTopicsType[D][K] {
+export function getTopic<
+  D extends keyof KafkaTopicsType,
+  K extends keyof KafkaTopicsType[D],
+>(domain: D, key: K): KafkaTopicsType[D][K] {
   return KafkaTopics[domain][key];
 }

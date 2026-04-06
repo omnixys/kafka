@@ -16,4 +16,7 @@ export const KAFKA_CLIENT = Symbol("KAFKA_CLIENT");
 
 export const KAFKA_HANDLER = Symbol("KAFKA_HANDLER");
 
+/**
+ * Metadata key used to store Kafka event topics on handler methods.
+ */
 export const KAFKA_EVENT_METADATA = Symbol("KAFKA_EVENT_METADATA");

@@ -4,87 +4,87 @@
  * Maps Kafka topics to their payload types.
  */
 
-// import { EventAddressInput } from "@omnixys/graphql";
 import type {
-  AddUserIdDTO,
-  CreateSeatDTO,
+  ActorIdDTO,
+  AddEventRoleDTO,
   CreateUserAddressDTO,
+  CreateUserDTO,
   CreateUserProviderDTO,
   EventActionDTO,
-  SendMagicLinkDTO,
-  SendResetLinkDTO,
+  EventAddress,
   UserActionDTO,
+  UserIdDTO,
+  UserCredentialsDTO,
+  SendAuthLinkDTO,
+  TokenDTO,
+  CreateSeatDTO,
+  TokenUserActionDTO,
+  AddGuestIdToInvitationDTO,
+  GuestNotificationDTO,
+  CreateGuestDTO,
 } from "@omnixys/shared";
-import { KafkaTopics } from "./kafka-topics";
+import { KafkaTopics } from "./kafka-topics.js";
+import { LogDTO } from "../kafka.dto.js";
 
 /**
  * Event payload definitions
  */
 export interface KafkaEventRegistry {
-  // [KafkaTopics.address.createEventAddress]: EventAddressInput;
+  [KafkaTopics.address.createEventAddress]: EventAddress;
   [KafkaTopics.address.deleteEventAddress]: EventActionDTO;
   [KafkaTopics.address.createUserAddresses]: CreateUserAddressDTO;
-  [KafkaTopics.address.deleteUserAddresses]: UserActionDTO;
-  [KafkaTopics.address.restart]: UserActionDTO;
-  [KafkaTopics.address.shutdown]: UserActionDTO;
+  [KafkaTopics.address.deleteUserAddresses]: UserIdDTO;
 
-  [KafkaTopics.admin.allRestart]: UserActionDTO;
-  [KafkaTopics.admin.allShutdown]: UserActionDTO;
+  [KafkaTopics.address.restart]: ActorIdDTO;
+  [KafkaTopics.address.shutdown]: ActorIdDTO;
 
-  [KafkaTopics.authentication.restart]: UserActionDTO;
-  [KafkaTopics.authentication.shutdown]: UserActionDTO;
+  [KafkaTopics.admin.allRestart]: ActorIdDTO;
+  [KafkaTopics.admin.allShutdown]: ActorIdDTO;
 
-  [KafkaTopics.event.restart]: UserActionDTO;
-  [KafkaTopics.event.shutdown]: UserActionDTO;
+  [KafkaTopics.authentication.restart]: ActorIdDTO;
+  [KafkaTopics.authentication.shutdown]: ActorIdDTO;
 
-  [KafkaTopics.invitation.restart]: UserActionDTO;
-  [KafkaTopics.invitation.shutdown]: UserActionDTO;
+  [KafkaTopics.event.restart]: ActorIdDTO;
+  [KafkaTopics.event.shutdown]: ActorIdDTO;
+  [KafkaTopics.event.addRole]: AddEventRoleDTO;
+  [KafkaTopics.event.removeRoles]: UserActionDTO;
 
-  // [KafkaTopics.logstream.address]: LogDTO;
-  // [KafkaTopics.logstream.admin]: LogDTO;
-  // [KafkaTopics.logstream.authentication]: LogDTO;
-  // [KafkaTopics.logstream.event]: LogDTO;
-  // [KafkaTopics.logstream.invitation]: LogDTO;
-  // [KafkaTopics.logstream.notification]: LogDTO;
-  // [KafkaTopics.logstream.seat]: LogDTO;
-  // [KafkaTopics.logstream.ticket]: LogDTO;
-  // [KafkaTopics.logstream.user]: LogDTO;
-  // [KafkaTopics.logstream.restart]: LogDTO;
-  // [KafkaTopics.logstream.shutdown]: LogDTO;
+  [KafkaTopics.gateway.restart]: ActorIdDTO;
+  [KafkaTopics.gateway.shutdown]: ActorIdDTO;
+  [KafkaTopics.gateway.sendCredentials]: UserCredentialsDTO;
 
-  [KafkaTopics.notification.sendCredentials]: string;
-  [KafkaTopics.notification.sendRequestReset]: SendResetLinkDTO;
-  [KafkaTopics.notification.sendMagicLink]: SendMagicLinkDTO;
-  // [KafkaTopics.notification.createUser]: MailDTO;
-  [KafkaTopics.notification.restart]: UserActionDTO;
-  [KafkaTopics.notification.shutdown]: UserActionDTO;
+  [KafkaTopics.invitation.restart]: ActorIdDTO;
+  [KafkaTopics.invitation.shutdown]: ActorIdDTO;
+  [KafkaTopics.invitation.addGuestId]: AddGuestIdToInvitationDTO;
+  [KafkaTopics.invitation.deleteInvitations]: UserActionDTO;
+
+  [KafkaTopics.logstream.log]: LogDTO;
+  [KafkaTopics.logstream.restart]: ActorIdDTO;
+  [KafkaTopics.logstream.shutdown]: ActorIdDTO;
+
+  [KafkaTopics.notification.sendRequestReset]: SendAuthLinkDTO;
+  [KafkaTopics.notification.sendMagicLink]: SendAuthLinkDTO;
+  [KafkaTopics.notification.notifyUser]: TokenDTO;
+  [KafkaTopics.notification.restart]: ActorIdDTO;
+  [KafkaTopics.notification.shutdown]: ActorIdDTO;
+  [KafkaTopics.notification.confirmGuest]: GuestNotificationDTO;
 
   [KafkaTopics.seat.create]: CreateSeatDTO;
   [KafkaTopics.seat.delete]: EventActionDTO;
-  [KafkaTopics.seat.restart]: UserActionDTO;
-  [KafkaTopics.seat.shutdown]: UserActionDTO;
+  [KafkaTopics.seat.restart]: ActorIdDTO;
+  [KafkaTopics.seat.shutdown]: ActorIdDTO;
+  [KafkaTopics.seat.addGuestId]: CreateUserDTO;
+  [KafkaTopics.seat.deleteGuestId]: UserIdDTO;
 
-  [KafkaTopics.ticket.restart]: UserActionDTO;
-  [KafkaTopics.ticket.shutdown]: UserActionDTO;
+  [KafkaTopics.ticket.restart]: ActorIdDTO;
+  [KafkaTopics.ticket.shutdown]: ActorIdDTO;
+  [KafkaTopics.ticket.deleteTickets]: UserActionDTO;
+  [KafkaTopics.ticket.create]: TokenDTO;
 
-  // [KafkaTopics.user.createUser]: EventAction;
-  // [KafkaTopics.user.addId]: EventAction;
-  [KafkaTopics.user.deleteUser]: UserActionDTO;
-  [KafkaTopics.user.addId]: AddUserIdDTO;
+  [KafkaTopics.user.deleteUser]: UserIdDTO;
+  [KafkaTopics.user.createUser]: CreateUserDTO;
+  [KafkaTopics.user.createGuest]: CreateGuestDTO;
   [KafkaTopics.user.createProviderUser]: CreateUserProviderDTO;
-  [KafkaTopics.user.shutdown]: UserActionDTO;
-  [KafkaTopics.user.restart]: UserActionDTO;
-
-  // [KafkaTopics.ticket.deleteTickets]: {
-  //   userId: string;
-  // };
-
-  // [KafkaTopics.invitation.deleteInvitation]: {
-  //   invitationId: string;
-  // };
-
-  // [KafkaTopics.invitation.addGuestId]: {
-  //   invitationId: string;
-  //   guestId: string;
-  // };
+  [KafkaTopics.user.shutdown]: ActorIdDTO;
+  [KafkaTopics.user.restart]: ActorIdDTO;
 }

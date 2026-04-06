@@ -31,7 +31,9 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts",
+    "build": "tsc -p tsconfig.json",
+    "clean": "rimraf dist",
+    "build:tsup": "tsup src/index.ts --format esm,cjs --dts",
     "patch": "pnpm version patch",
     "release": "semantic-release",
     "lint": "biome lint",
@@ -49,12 +51,13 @@
   ],
   "license": "GPL-3.0-or-later",
   "devDependencies": {
-    "@biomejs/biome": "^2.4.8",
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.4.2",
     "@nestjs/core": "^11.1.17",
-    "@omnixys/observability": "^2.1.2",
-    "@omnixys/shared": "^2.0.1",
+    "@omnixys/observability": "file:../observability",
+    "@omnixys/shared": "file:../shared",
+    "@omnixys/context": "file:../context",
+    "@omnixys/cache": "file:../cache",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/git": "^10.0.1",
@@ -70,8 +73,8 @@
   "peerDependencies": {
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.1.17",
-    "@omnixys/observability": "^2.0.1",
-    "@omnixys/shared": "^2.0.1"
+    "@omnixys/observability": "file:../observability",
+    "@omnixys/shared": "file:../shared"
   },
   "dependencies": {
     "kafkajs": "^2.2.4",

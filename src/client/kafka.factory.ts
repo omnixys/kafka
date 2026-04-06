@@ -1,16 +1,19 @@
 import { Kafka, logLevel } from "kafkajs";
-import type { KafkaModuleOptions } from "../core/kafka.options";
+import type { KafkaModuleOptions } from "../core/kafka.options.js";
 
-export function createKafkaClient(options: KafkaModuleOptions) {
+
+export function createKafkaClient(options: KafkaModuleOptions): Kafka {
   return new Kafka({
     clientId: options.clientId,
     brokers: options.brokers,
     logLevel: logLevel.INFO,
+
     retry: {
-      retries: 10,
+      retries: 20,
       initialRetryTime: 300,
-      maxRetryTime: 3000,
+      maxRetryTime: 30000,
     },
+
     connectionTimeout: 10000,
     requestTimeout: 30000,
   });

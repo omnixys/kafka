@@ -1,2 +1,2 @@
-export * from "./kafka-event.decorator";
-export * from "./kafka-handler.decorator";
+export * from "./kafka-event.decorator.js";
+export * from "./kafka-handler.decorator.js";

@@ -1,1 +1,1 @@
-export * from "./kafka-consumer.service";
+export * from "./kafka-consumer.service.js";

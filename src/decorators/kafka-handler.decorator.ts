@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { KAFKA_HANDLER } from "../core/kafka.constants";
+import { KAFKA_HANDLER } from "../core/kafka.constants.js";
 
 export function KafkaHandler(topic: string): MethodDecorator {
   return (target: Object, propertyKey: string | symbol, descriptor: PropertyDescriptor) => {

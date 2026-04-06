@@ -1,5 +1,6 @@
-import { KafkaHeaderCarrier } from "./kafka-header-carrier";
+import { KafkaCarrier } from "./kafka-header-carrier.js";
 
 export function createKafkaHeaders() {
-  return new KafkaHeaderCarrier({});
+  return new KafkaCarrier({});
 }
+
