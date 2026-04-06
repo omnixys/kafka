@@ -1,11 +1,13 @@
-export interface KafkaEnvelope<T = any> {
+import { KafkaPayloadType, KafkaTopicType } from "./kafka-event.types.js";
+
+export interface KafkaEnvelope<T extends KafkaTopicType = KafkaTopicType> {
   eventId: string;
-  eventType: EventType;
-  eventName: string;
+  eventName: T;
+  eventType?: string;
   eventVersion: string;
   service: string;
   timestamp: string;
-  payload: T;
+  payload: KafkaPayloadType<T>;
 }
 
 

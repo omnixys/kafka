@@ -1,17 +1,17 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import {
+  KafkaTrace,
   TraceContextExtractor,
   W3CPropagator,
-  KafkaTrace,
 } from "@omnixys/observability";
 import type { Message, Producer } from "kafkajs";
 import { KAFKA_PRODUCER } from "../core/kafka.constants.js";
 import type { KafkaEnvelope } from "../types/kafka-envelope.js";
 
 import { createKafkaHeaders } from "../headers/kafka-header-builder.js";
-import { KafkaEventRegistry } from "../types/kafka-event-registry.js";
-import { KafkaEventType, KafkaTopic } from "../types/kafka-event.types.js";
 import { DEFAULT_KAFKA, KAFKA_HEADERS } from "../types/kafka-constants.js";
+import { KafkaEventRegistry } from "../types/kafka-event-registry.js";
+import { KafkaEventType, KafkaTopicType } from "../types/kafka-event.types.js";
 
 @Injectable()
 export class KafkaProducerService {
@@ -22,7 +22,9 @@ export class KafkaProducerService {
     private readonly producer: Producer,
   ) {}
 
-  async send<T extends KafkaTopic>(input: KafkaEventType<T>): Promise<void> {
+  async send<T extends KafkaTopicType>(
+    input: KafkaEventType<T>,
+  ): Promise<void> {
     const { topic, payload, meta } = input;
 
     const carrier = createKafkaHeaders();
@@ -51,7 +53,7 @@ export class KafkaProducerService {
 
     const headers = carrier.toKafkaHeaders();
 
-    const envelope: KafkaEnvelope<KafkaEventRegistry[T]> = {
+    const envelope: KafkaEnvelope<T> = {
       eventId: crypto.randomUUID(),
       eventName: topic,
       eventType: meta.type,

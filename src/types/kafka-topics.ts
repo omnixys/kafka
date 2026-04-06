@@ -44,6 +44,8 @@ export const KafkaTopics = {
 
     addRole: "authentication.addRole.event",
     removeRoles: "authentication.removeRole.event",
+
+    delete: "authentication.delete.event",
   },
 
   gateway: {
@@ -56,8 +58,9 @@ export const KafkaTopics = {
   invitation: {
     restart: `admin.restart.invitation`,
     shutdown: `admin.shutdown.invitation`,
-    deleteInvitations: `authentication.delete.invitation`,
+    deleteUserInvitations: `authentication.userDelete.invitation`,
     addGuestId: `ticket.addGuestId.invitation`,
+    deleteEventInvitations: "event.eventDelete.invitation",
   },
 
   logstream: {
@@ -75,6 +78,8 @@ export const KafkaTopics = {
 
     confirmGuest: "invitation.confirmGuest.notification",
     notifyUser: `authentication.notifyRegistration.notification`,
+
+    eventCancelled: "event.cancel.notification",
   },
 
   seat: {
@@ -85,14 +90,15 @@ export const KafkaTopics = {
     delete: "event.delete.seat",
 
     addGuestId: `user.addGuestId.seat`,
-    deleteGuestId: `user.deleteGuestId.seat`,
+    removeGuestId: `user.deleteGuestId.seat`,
   },
 
   ticket: {
     restart: `admin.restart.ticket`,
     shutdown: `admin.shutdown.ticket`,
 
-    deleteTickets: `authentication.delete.ticket`,
+    deleteEventTickets: "event.eventDelete.ticket",
+    deleteUserTickets: "authentication.userDelete.ticket",
     create: `authentication.create.ticket`,
   },
 

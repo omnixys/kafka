@@ -1,15 +1,8 @@
 import { Injectable, Logger, OnApplicationBootstrap} from "@nestjs/common";
 import { DiscoveryService, MetadataScanner, Reflector } from "@nestjs/core";
 import { KAFKA_EVENT_METADATA, KAFKA_HANDLER } from "../core/kafka.constants.js";
-
-/**
- * Strongly typed handler function
- */
-type KafkaHandlerFn = (
-  topic: string,
-  payload: unknown,
-  context: unknown,
-) => Promise<void> | void;
+import { KafkaPayloadType, KafkaTopicType, TypedKafkaHandler } from "../types/kafka-event.types.js";
+import { IKafkaEventContext } from "../types/kafka-event.interface.js";
 
 /**
  * Internal registry entry
@@ -128,7 +121,11 @@ export class KafkaEventDispatcherService implements OnApplicationBootstrap {
   /**
    * Dispatches a Kafka event to the correct handler.
    */
-  async dispatch(topic: string, payload: unknown, context: unknown) {
+  async dispatch<T extends KafkaTopicType>(
+    topic: T,
+    payload: KafkaPayloadType<T>,
+    context: IKafkaEventContext,
+  ): Promise<void> {
     const entry = this.handlers.get(topic);
 
     if (!entry) {
@@ -136,13 +133,15 @@ export class KafkaEventDispatcherService implements OnApplicationBootstrap {
       return;
     }
 
+      const method = entry.instance[entry.methodName] as (
+  payload: KafkaPayloadType<T>,
+  context: IKafkaEventContext,
+) => Promise<void> | void;
 
-        const method = entry.instance[entry.methodName] as KafkaHandlerFn;
+    if (typeof method !== "function") {
+      throw new Error(`Invalid handler for topic=${topic}`);
+    }
 
-        if (typeof method !== "function") {
-          throw new Error(`Invalid handler for topic=${topic}`);
-        }
-    
-    await method.call(entry.instance, topic, payload, context);
+    await method.call(entry.instance, payload, context);
   }
 }

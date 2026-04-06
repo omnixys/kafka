@@ -14,6 +14,8 @@ import { KafkaCarrier } from "../headers/kafka-header-carrier.js";
 import { KafkaIdempotencyService } from "./kafka-idempotency.service.js";
 import { KafkaRetryService } from "./kafka-retry.service.js";
 import { KafkaCircuitBreakerService } from "./kafka-circuit-breaker.service.js";
+import { KafkaEnvelope } from "../types/kafka-envelope.js";
+import { KafkaPayloadType, KafkaTopicType } from "../types/kafka-event.types.js";
 
 @Injectable()
 export class KafkaConsumerService
@@ -138,10 +140,13 @@ export class KafkaConsumerService
       return;
     }
 
-    let envelope: any;
+    let envelope: KafkaEnvelope;
 
     try {
-      envelope = JSON.parse(rawValue) as Record<string, unknown>;
+      envelope = JSON.parse(rawValue) as KafkaEnvelope;
+            if (!envelope.eventName || !envelope.payload) {
+              throw new Error("Invalid Kafka envelope");
+            }
     } catch (error) {
       this.logger.error(
         `Invalid JSON message for topic=${topic} partition=${partition} offset=${message.offset}`,
@@ -153,9 +158,17 @@ export class KafkaConsumerService
       return;
     }
 
+    /**
+     * Runtime safety check for topic consistency
+     */
+    if (envelope.eventName !== topic) {
+      this.logger.warn(
+        `Topic mismatch: envelope=${envelope.eventName} kafka=${topic}`,
+      );
+    }
+
     const eventId =
       typeof envelope.eventId === "string" ? envelope.eventId : undefined;
-
 
     /**
      * Idempotency check
@@ -183,7 +196,7 @@ export class KafkaConsumerService
        * Protected execution via circuit breaker
        */
       await this.circuitBreaker.execute(async () => {
-        await this.dispatcher.dispatch(topic, envelope.payload, {
+        await this.dispatchTyped(envelope.eventName, envelope.payload, {
           topic,
           partition,
           offset: message.offset,
@@ -218,6 +231,17 @@ export class KafkaConsumerService
        */
       resolveOffset(message.offset);
     }
+  }
+
+  /**
+   * 🔥 Typed bridge → avoids losing type information
+   */
+  private async dispatchTyped<T extends KafkaTopicType>(
+    topic: T,
+    payload: KafkaPayloadType<T>,
+    context: any,
+  ): Promise<void> {
+    await this.dispatcher.dispatch(topic, payload, context);
   }
 
   /**

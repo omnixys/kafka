@@ -1,5 +1,9 @@
 import { SetMetadata } from "@nestjs/common";
-import { KAFKA_HANDLER, KAFKA_EVENT_METADATA } from "../core/kafka.constants.js";
+import {
+  KAFKA_EVENT_METADATA,
+  KAFKA_HANDLER,
+} from "../core/kafka.constants.js";
+import { KafkaTopicType } from "../types/kafka-event.types.js";
 
 export function KafkaEventHandler(name: string): ClassDecorator {
   return SetMetadata(KAFKA_HANDLER, name);
@@ -13,6 +17,12 @@ export function KafkaEventHandler(name: string): ClassDecorator {
  * Example:
  * @KafkaEvent('ticket.create')
  */
-export function KafkaEvent(...topics: string[]): MethodDecorator {
+// export function KafkaEvent(...topics: string[]): MethodDecorator {
+//   return SetMetadata(KAFKA_EVENT_METADATA, { topics });
+// }
+
+export function KafkaEvent<T extends KafkaTopicType>(
+  ...topics: T[]
+): MethodDecorator {
   return SetMetadata(KAFKA_EVENT_METADATA, { topics });
 }
