@@ -53,6 +53,7 @@ export const KafkaTopics = {
     shutdown: `admin.shutdown.gateway`,
 
     sendCredentials: "notification.sendCredentials.gateway",
+    createWhatsappMessage: "whatsapp.message.created",
   },
 
   invitation: {
@@ -109,6 +110,12 @@ export const KafkaTopics = {
     createUser: "authentication.create.user",
     createGuest: "authentication.createGuest.user",
     createProviderUser: "authentication.provider.user",
+  },
+
+  whatsapp: {
+    outgoing: "notification.outgoing.whatsapp",
+    retry: "notification.retry.whatsapp",
+    dlq: "notification.dlq.whatsapp",
   },
 } as const;
 

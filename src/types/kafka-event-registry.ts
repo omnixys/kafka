@@ -10,7 +10,7 @@ import type {
   UserTokenDTO,
   CreateUserProviderDTO,
   EventIdsDTO,
-  EventAddress,
+  WhatsAppMessageDTO,
   UserActionDTO,
   UserIdDTO,
   UserCredentialsDTO,
@@ -22,6 +22,10 @@ import type {
   GuestNotificationDTO,
   CreateUserWithInvitationIdDTO,
   CreateGuestDTO,
+  CreateEventAddressDTO,
+  WhatsAppOutgoingDTO,
+  WhatsAppRetryDTO,
+  WhatsAppDLQDTO,
 } from "@omnixys/shared";
 import { KafkaTopics } from "./kafka-topics.js";
 import { LogDTO } from "../kafka.dto.js";
@@ -30,7 +34,7 @@ import { LogDTO } from "../kafka.dto.js";
  * Event payload definitions
  */
 export interface KafkaEventRegistry {
-  [KafkaTopics.address.createEventAddress]: EventAddress;
+  [KafkaTopics.address.createEventAddress]: CreateEventAddressDTO;
   [KafkaTopics.address.deleteEventAddress]: EventIdsDTO;
   [KafkaTopics.address.createUserAddresses]: CreateUserAddressDTO;
   [KafkaTopics.address.deleteUserAddresses]: UserIdDTO;
@@ -53,6 +57,7 @@ export interface KafkaEventRegistry {
   [KafkaTopics.gateway.restart]: ActorIdDTO;
   [KafkaTopics.gateway.shutdown]: ActorIdDTO;
   [KafkaTopics.gateway.sendCredentials]: UserCredentialsDTO;
+  [KafkaTopics.gateway.createWhatsappMessage]: WhatsAppMessageDTO;
 
   [KafkaTopics.invitation.restart]: ActorIdDTO;
   [KafkaTopics.invitation.shutdown]: ActorIdDTO;
@@ -91,5 +96,9 @@ export interface KafkaEventRegistry {
   [KafkaTopics.user.createProviderUser]: CreateUserProviderDTO;
   [KafkaTopics.user.shutdown]: ActorIdDTO;
   [KafkaTopics.user.restart]: ActorIdDTO;
+
+  [KafkaTopics.whatsapp.outgoing]: WhatsAppOutgoingDTO;
+  [KafkaTopics.whatsapp.retry]: WhatsAppRetryDTO;
+  [KafkaTopics.whatsapp.dlq]: WhatsAppDLQDTO;
 }
 
