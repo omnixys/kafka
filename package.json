@@ -33,14 +33,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "clean": "rimraf dist",
-    "build:tsup": "tsup src/index.ts --format esm,cjs --dts",
     "patch": "pnpm version patch",
     "release": "semantic-release",
-    "lint": "biome lint",
-    "format": "biome format --write",
-    "lint:fix": "biome lint . --write",
-    "check": "biome check .",
-    "check:fix": "biome check --write",
     "dev": "tsc -w",
     "link": "pnpm link --global"
   },

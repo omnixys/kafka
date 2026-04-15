@@ -6,29 +6,29 @@
 
 import type {
   ActorIdDTO,
+  AddGuestIdToInvitationDTO,
+  CreateEventAddressDTO,
+  CreateGuestDTO,
+  CreateSeatDTO,
   CreateUserAddressDTO,
-  UserTokenDTO,
   CreateUserProviderDTO,
+  CreateUserWithInvitationIdDTO,
+  EventCancelNotificationDTO,
   EventIdsDTO,
-  WhatsAppMessageDTO,
-  UserActionDTO,
-  UserIdDTO,
-  UserCredentialsDTO,
+  GuestNotificationDTO,
   SendAuthLinkDTO,
   TokenDTO,
-  CreateSeatDTO,
-  EventCancelNotificationDTO,
-  AddGuestIdToInvitationDTO,
-  GuestNotificationDTO,
-  CreateUserWithInvitationIdDTO,
-  CreateGuestDTO,
-  CreateEventAddressDTO,
+  UserActionDTO,
+  UserCredentialsDTO,
+  UserIdDTO,
+  UserTokenDTO,
+  WhatsAppDLQDTO,
+  WhatsAppMessageDTO,
   WhatsAppOutgoingDTO,
   WhatsAppRetryDTO,
-  WhatsAppDLQDTO,
+  LogDTO,
 } from "@omnixys/shared";
 import { KafkaTopics } from "./kafka-topics.js";
-import { LogDTO } from "../kafka.dto.js";
 
 /**
  * Event payload definitions
@@ -101,4 +101,3 @@ export interface KafkaEventRegistry {
   [KafkaTopics.whatsapp.retry]: WhatsAppRetryDTO;
   [KafkaTopics.whatsapp.dlq]: WhatsAppDLQDTO;
 }
-
