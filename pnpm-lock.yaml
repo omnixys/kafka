@@ -557,7 +557,7 @@ packages:
       fastify: ^5.8.2
 
   '@omnixys/shared@1.0.0':
-    resolution: {integrity: sha512-dYb/OWDeaNmAfMmkw5edPnR7hYHY2gc7dAov8UtBPMhLjH0x+Dzwta/C+nFi5RSaNkEgHqYE93UFbhWTNiQpwA==, tarball: https://npm.pkg.github.com/download/@omnixys/shared/1.0.0/b513aa9153fec198cb487dc0e4557b3c0095edc9}
+    resolution: {integrity: sha512-wrwhdZApZ8AHlUZwrrBnfyqRZAdaIdZCo/aGy+IKzlVUX3hDEY2W3WrdB2WPqiLbA3HKmII7+8GNF2Qh0VtYDQ==, tarball: https://npm.pkg.github.com/download/@omnixys/shared/1.0.0/fc0083a34d12fb69c71a5e5082353d350d44821f}
     peerDependencies:
       '@nestjs/common': ^11.0.0
 

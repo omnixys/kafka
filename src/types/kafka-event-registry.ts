@@ -24,8 +24,7 @@ import type {
   UserTokenDTO,
   WhatsAppDLQDTO,
   WhatsAppMessageDTO,
-  WhatsAppOutgoingDTO,
-  WhatsAppRetryDTO,
+  WhatsappOutgoingDTO,
   LogDTO,
 } from "@omnixys/shared";
 import { KafkaTopics } from "./kafka-topics.js";
@@ -97,7 +96,7 @@ export interface KafkaEventRegistry {
   [KafkaTopics.user.shutdown]: ActorIdDTO;
   [KafkaTopics.user.restart]: ActorIdDTO;
 
-  [KafkaTopics.whatsapp.outgoing]: WhatsAppOutgoingDTO;
-  [KafkaTopics.whatsapp.retry]: WhatsAppRetryDTO;
+  [KafkaTopics.whatsapp.outgoing]: WhatsappOutgoingDTO;
+  [KafkaTopics.whatsapp.retry]: WhatsappOutgoingDTO;
   [KafkaTopics.whatsapp.dlq]: WhatsAppDLQDTO;
 }
