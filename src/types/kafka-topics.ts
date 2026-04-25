@@ -36,6 +36,9 @@ export const KafkaTopics = {
   authentication: {
     restart: `admin.restart.authentication`,
     shutdown: `admin.shutdown.authentication`,
+    deleteGuest: "invitation.deleteGuest.authentication",
+    deleteGuestList: "invitation.deleteGuestList.authentication",
+    createGuest: 'invitation.createGuest.authentication',
   },
 
   event: {

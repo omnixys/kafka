@@ -29,13 +29,13 @@ importers:
         version: 11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@omnixys/cache':
         specifier: ^1.0.0
-        version: 1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@omnixys/observability@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.5))(@omnixys/shared@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))
+        version: 1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@omnixys/observability@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.5))(@omnixys/shared@file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))
       '@omnixys/observability':
         specifier: ^1.0.0
-        version: 1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.5)
+        version: 1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.5)
       '@omnixys/shared':
-        specifier: ^1.0.0
-        version: 1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))
+        specifier: 'file: ../../../shared'
+        version: file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))
       '@semantic-release/changelog':
         specifier: ^6.0.3
         version: 6.0.3(semantic-release@25.0.3(typescript@5.9.3))
@@ -542,6 +542,7 @@ packages:
 
   '@omnixys/cache@1.0.0':
     resolution: {integrity: sha512-VxO0bg08wkDqNY5UHcvIFQickmHblm12pIr3DzRs9Ba9fdBoPQ5WxZuB5EgiIPCgjO1fBUHgtbH6WS1Ozwa0+Q==, tarball: https://npm.pkg.github.com/download/@omnixys/cache/1.0.0/2b94aa44c69fe74f4120f24de7ea9a177539bfdc}
+    version: 1.0.0
     peerDependencies:
       '@nestjs/common': ^11.1.17
       '@omnixys/observability': ^1.0.0
@@ -549,6 +550,7 @@ packages:
 
   '@omnixys/observability@1.0.0':
     resolution: {integrity: sha512-r96mPcg8BQc/HG4xwE4lWxtGVfowij6HNIDOLDFpLguAaDrrLy818UGrvVJ0RgbookGRdvrpDBDc6Uf64vl00g==, tarball: https://npm.pkg.github.com/download/@omnixys/observability/1.0.0/e9f7e3ccc8a48561fbe3c7a4c02e075502f97a89}
+    version: 1.0.0
     peerDependencies:
       '@nestjs/common': ^11.0.0
       '@nestjs/core': ^11.1.17
@@ -556,8 +558,8 @@ packages:
       '@omnixys/shared': ^1.0.0
       fastify: ^5.8.2
 
-  '@omnixys/shared@1.0.0':
-    resolution: {integrity: sha512-wrwhdZApZ8AHlUZwrrBnfyqRZAdaIdZCo/aGy+IKzlVUX3hDEY2W3WrdB2WPqiLbA3HKmII7+8GNF2Qh0VtYDQ==, tarball: https://npm.pkg.github.com/download/@omnixys/shared/1.0.0/fc0083a34d12fb69c71a5e5082353d350d44821f}
+  '@omnixys/shared@file:../shared':
+    resolution: {directory: ../shared, type: directory}
     peerDependencies:
       '@nestjs/common': ^11.0.0
 
@@ -3673,19 +3675,19 @@ snapshots:
     dependencies:
       '@octokit/openapi-types': 27.0.0
 
-  '@omnixys/cache@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@omnixys/observability@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.5))(@omnixys/shared@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))':
+  '@omnixys/cache@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@omnixys/observability@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.5))(@omnixys/shared@file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))':
     dependencies:
       '@nestjs/common': 11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@omnixys/observability': 1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.5)
-      '@omnixys/shared': 1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))
+      '@omnixys/observability': 1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.5)
+      '@omnixys/shared': file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))
       '@valkey/client': 1.0.0
 
-  '@omnixys/observability@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.5)':
+  '@omnixys/observability@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))(fastify@5.8.5)':
     dependencies:
       '@nestjs/common': 11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/graphql': 13.2.5(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.17(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2)
-      '@omnixys/shared': 1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))
+      '@omnixys/shared': file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/auto-instrumentations-node': 0.71.0(@opentelemetry/api@1.9.1)(@opentelemetry/core@2.6.1(@opentelemetry/api@1.9.1))
       '@opentelemetry/context-async-hooks': 2.6.1(@opentelemetry/api@1.9.1)
@@ -3702,7 +3704,7 @@ snapshots:
       - '@opentelemetry/core'
       - supports-color
 
-  '@omnixys/shared@1.0.0(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))':
+  '@omnixys/shared@file:../shared(@nestjs/common@11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2))':
     dependencies:
       '@nestjs/common': 11.1.16(reflect-metadata@0.2.2)(rxjs@7.8.2)
       dataloader: 2.2.3

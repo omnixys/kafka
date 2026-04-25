@@ -26,6 +26,8 @@ import type {
   WhatsAppMessageDTO,
   WhatsappOutgoingDTO,
   LogDTO,
+  UserIdListDTO,
+  CreatePlusOneAccountDTO,
 } from "@omnixys/shared";
 import { KafkaTopics } from "./kafka-topics.js";
 
@@ -46,6 +48,9 @@ export interface KafkaEventRegistry {
 
   [KafkaTopics.authentication.restart]: ActorIdDTO;
   [KafkaTopics.authentication.shutdown]: ActorIdDTO;
+  [KafkaTopics.authentication.deleteGuest]: UserIdDTO;
+  [KafkaTopics.authentication.deleteGuestList]: UserIdListDTO;
+  [KafkaTopics.authentication.createGuest]: CreatePlusOneAccountDTO;
 
   [KafkaTopics.event.restart]: ActorIdDTO;
   [KafkaTopics.event.shutdown]: ActorIdDTO;
