@@ -7,6 +7,7 @@ import { kafkaBootstrapProviders } from "../kafka-bootstrap.provider.js";
 import { KafkaProducerService } from "../producer/kafka-producer.service.js";
 import {
   KAFKA_CONSUMER,
+  KAFKA_EVENT_PUBLISHER,
   KAFKA_INSTANCE,
   KAFKA_OPTIONS,
   KAFKA_PRODUCER,
@@ -63,12 +64,20 @@ export class KafkaModule {
     return {
       module: KafkaModule,
       imports: [...imports, DiscoveryModule],
-      providers: [...providers, ...services],
+      providers: [
+        ...providers,
+        ...services,
+        {
+          provide: KAFKA_EVENT_PUBLISHER,
+          useExisting: KafkaProducerService,
+        },
+      ],
       exports: [
         KAFKA_OPTIONS,
         KAFKA_INSTANCE,
         KAFKA_PRODUCER,
         KAFKA_CONSUMER,
+        KAFKA_EVENT_PUBLISHER,
         ...services,
       ],
     };

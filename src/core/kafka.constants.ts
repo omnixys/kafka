@@ -12,6 +12,11 @@ export const KAFKA_INSTANCE = Symbol("KAFKA_INSTANCE");
  */
 export const KAFKA_PRODUCER = Symbol("KAFKA_PRODUCER");
 
+/** Stable, package-neutral publisher token for integrations such as logging. */
+export const KAFKA_EVENT_PUBLISHER = Symbol.for(
+  "@omnixys/kafka/event-publisher",
+);
+
 export const KAFKA_CLIENT = Symbol("KAFKA_CLIENT");
 
 export const KAFKA_HANDLER = Symbol("KAFKA_HANDLER");

@@ -2,6 +2,7 @@ import { ContextAccessor } from "@omnixys/context";
 import {
   KAFKA_HANDLER,
   KAFKA_HEADERS,
+  KAFKA_EVENT_PUBLISHER,
   KafkaCircuitBreakerService,
   KafkaCircuitOpenError,
   KafkaConsumerService,
@@ -303,6 +304,14 @@ test("module async registration and compatibility decorator remain available", (
     }),
   });
   assert.ok(module.providers.length > 0);
+  assert.ok(
+    module.providers.some(
+      (provider) =>
+        provider.provide === KAFKA_EVENT_PUBLISHER &&
+        provider.useExisting === KafkaProducerService,
+    ),
+  );
+  assert.ok(module.exports.includes(KAFKA_EVENT_PUBLISHER));
 
   class Handler {}
   KafkaHandler("handler-name")(Handler);
