@@ -49,6 +49,7 @@ export const KafkaTopics = {
     removeRoles: "authentication.removeRole.event",
 
     delete: "authentication.delete.event",
+    mediaUploaded: "event.media.uploaded",
   },
 
   gateway: {

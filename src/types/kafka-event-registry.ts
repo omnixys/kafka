@@ -15,6 +15,7 @@ import type {
   CreateUserWithInvitationIdDTO,
   EventCancelNotificationDTO,
   EventIdsDTO,
+  EventMediaUploadedDTO,
   GuestNotificationDTO,
   SendAuthLinkDTO,
   TokenDTO,
@@ -57,6 +58,7 @@ export interface KafkaEventRegistry {
   [KafkaTopics.event.addRole]: CreateUserWithInvitationIdDTO;
   [KafkaTopics.event.removeRoles]: UserActionDTO;
   [KafkaTopics.event.delete]: UserIdDTO;
+  [KafkaTopics.event.mediaUploaded]: EventMediaUploadedDTO;
 
   [KafkaTopics.gateway.restart]: ActorIdDTO;
   [KafkaTopics.gateway.shutdown]: ActorIdDTO;

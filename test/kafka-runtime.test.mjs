@@ -61,6 +61,10 @@ test("producer propagates canonical context and emits a stable envelope", async 
   assert.equal(message.headers[KAFKA_HEADERS.TENANT_ID].toString(), "tenant-1");
 });
 
+test("event media uploads have a stable canonical topic", () => {
+  assert.equal(KafkaTopics.event.mediaUploaded, "event.media.uploaded");
+});
+
 test("producer batches by topic and exposes graceful lifecycle APIs", async () => {
   const transport = createProducerTransport();
   const producer = new KafkaProducerService(transport);
