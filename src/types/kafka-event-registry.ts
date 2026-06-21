@@ -28,7 +28,7 @@ import type {
   LogDTO,
   UserIdListDTO,
   CreatePlusOneAccountDTO,
-} from "@omnixys/shared";
+} from "@omnixys/contracts";
 import { KafkaTopics } from "./kafka-topics.js";
 
 /**

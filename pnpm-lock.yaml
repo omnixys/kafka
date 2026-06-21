@@ -29,19 +29,19 @@ importers:
         version: 11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@omnixys/cache':
         specifier: file:../cache
-        version: file:../cache(1dc9b5e305c8829ee9e3a6c27e2c9aa6)
+        version: file:../cache(1c407e8cbe375fb57ba3c34d97521ebd)
       '@omnixys/context':
         specifier: file:../context
         version: file:../context(@fastify/cookie@11.0.2)(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.3.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)))(fastify@5.8.5)(graphql@16.13.2)(rxjs@7.8.2)
+      '@omnixys/contracts':
+        specifier: file:../contracts
+        version: file:../contracts
       '@omnixys/logger':
         specifier: file:../logger
         version: file:../logger(1af9eb9ae286bce2c83a85d086ebdf90)
       '@omnixys/observability':
         specifier: ^1.0.0
         version: 1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.3.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.7.0(@opentelemetry/api@1.9.1))(fastify@5.8.5)
-      '@omnixys/shared':
-        specifier: ^1.0.0
-        version: 1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))
       '@semantic-release/changelog':
         specifier: ^6.0.3
         version: 6.0.3(semantic-release@25.0.3(typescript@6.0.3))
@@ -572,10 +572,10 @@ packages:
       '@nestjs/common': ^11.1.17
       '@nestjs/core': ^11.1.19
       '@omnixys/context': ^1.0.0
+      '@omnixys/contracts': ^1.0.0
       '@omnixys/logger': ^1.0.0
       '@omnixys/observability': ^1.0.0
       '@omnixys/security': ^1.0.0
-      '@omnixys/shared': ^1.0.0
 
   '@omnixys/context@file:../context':
     resolution: {directory: ../context, type: directory}
@@ -589,6 +589,10 @@ packages:
       fastify: ^5.8.4
       graphql: ^16.13.2
       rxjs: ^7.8.2
+
+  '@omnixys/contracts@file:../contracts':
+    resolution: {directory: ../contracts, type: directory}
+    engines: {node: '>=20'}
 
   '@omnixys/kafka@1.0.0':
     resolution: {integrity: sha512-E7SXlNovc9Z/tsCs/TtjRhitz+lzgsJnOCTZ0PwOsM9TGuxEm31zgMS3wFgF46xnNHVbwVnBD9ScPuGdiyNlBg==, tarball: https://npm.pkg.github.com/download/@omnixys/kafka/1.0.0/19a4d5282fd9dc971b5d68848a46dd302596b6ee}
@@ -3593,6 +3597,9 @@ packages:
     resolution: {integrity: sha512-CzhO+pFNo8ajLM2d2IW/R93ipy99LWjtwblvC1RsoSUMZgyLbYFr221TnSNT7GjGdYui6P459mw9JH/g/zW2ug==}
     engines: {node: '>=18'}
 
+  zod@4.4.3:
+    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+
 snapshots:
 
   '@actions/core@3.0.1':
@@ -4057,15 +4064,15 @@ snapshots:
     dependencies:
       '@octokit/openapi-types': 27.0.0
 
-  '@omnixys/cache@file:../cache(1dc9b5e305c8829ee9e3a6c27e2c9aa6)':
+  '@omnixys/cache@file:../cache(1c407e8cbe375fb57ba3c34d97521ebd)':
     dependencies:
       '@nestjs/common': 11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@omnixys/context': file:../context(@fastify/cookie@11.0.2)(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.3.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)))(fastify@5.8.5)(graphql@16.13.2)(rxjs@7.8.2)
+      '@omnixys/contracts': file:../contracts
       '@omnixys/logger': file:../logger(1af9eb9ae286bce2c83a85d086ebdf90)
       '@omnixys/observability': 1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.3.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.7.0(@opentelemetry/api@1.9.1))(fastify@5.8.5)
       '@omnixys/security': 1.0.0(58305474642ab57d405cde42b2810186)
-      '@omnixys/shared': 1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))
       '@valkey/client': 1.0.0
 
   '@omnixys/context@file:../context(@fastify/cookie@11.0.2)(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.3.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)))(fastify@5.8.5)(graphql@16.13.2)(rxjs@7.8.2)':
@@ -4081,11 +4088,15 @@ snapshots:
       rxjs: 7.8.2
       ua-parser-js: 1.0.41
 
+  '@omnixys/contracts@file:../contracts':
+    dependencies:
+      zod: 4.4.3
+
   '@omnixys/kafka@1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@omnixys/cache@1.0.0)(@omnixys/observability@1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.3.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.7.0(@opentelemetry/api@1.9.1))(fastify@5.8.5))(@omnixys/shared@1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)))':
     dependencies:
       '@nestjs/common': 11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)
       '@nestjs/core': 11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@omnixys/cache': file:../cache(1dc9b5e305c8829ee9e3a6c27e2c9aa6)
+      '@omnixys/cache': file:../cache(1c407e8cbe375fb57ba3c34d97521ebd)
       '@omnixys/observability': 1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/graphql@13.3.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.19(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(graphql@16.13.2)(reflect-metadata@0.2.2))(@omnixys/shared@1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2)))(@opentelemetry/core@2.7.0(@opentelemetry/api@1.9.1))(fastify@5.8.5)
       '@omnixys/shared': 1.0.0(@nestjs/common@11.1.19(reflect-metadata@0.2.2)(rxjs@7.8.2))
       kafkajs: 2.2.4
@@ -7193,3 +7204,5 @@ snapshots:
       fd-slicer: 1.1.0
 
   yoctocolors@2.1.2: {}
+
+  zod@4.4.3: {}
