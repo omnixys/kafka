@@ -16,6 +16,7 @@ import type {
   EventCancelNotificationDTO,
   EventIdsDTO,
   EventMediaUploadedDTO,
+  EventMilestoneRecordedDTO,
   GuestNotificationDTO,
   SendAuthLinkDTO,
   TokenDTO,
@@ -59,6 +60,7 @@ export interface KafkaEventRegistry {
   [KafkaTopics.event.removeRoles]: UserActionDTO;
   [KafkaTopics.event.delete]: UserIdDTO;
   [KafkaTopics.event.mediaUploaded]: EventMediaUploadedDTO;
+  [KafkaTopics.event.milestoneRecorded]: EventMilestoneRecordedDTO;
 
   [KafkaTopics.gateway.restart]: ActorIdDTO;
   [KafkaTopics.gateway.shutdown]: ActorIdDTO;

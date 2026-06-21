@@ -50,6 +50,7 @@ export const KafkaTopics = {
 
     delete: "authentication.delete.event",
     mediaUploaded: "event.media.uploaded",
+    milestoneRecorded: "event.milestone.recorded",
   },
 
   gateway: {

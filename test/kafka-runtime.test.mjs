@@ -63,6 +63,10 @@ test("producer propagates canonical context and emits a stable envelope", async 
 
 test("event media uploads have a stable canonical topic", () => {
   assert.equal(KafkaTopics.event.mediaUploaded, "event.media.uploaded");
+  assert.equal(
+    KafkaTopics.event.milestoneRecorded,
+    "event.milestone.recorded",
+  );
 });
 
 test("producer batches by topic and exposes graceful lifecycle APIs", async () => {
