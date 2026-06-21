@@ -1,103 +1,117 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { KAFKA_OPTIONS, KAFKA_PRODUCER } from "../core/kafka.constants.js";
+import { KafkaLifecycleError } from "../core/kafka.error.js";
+import type { KafkaModuleOptions } from "../core/kafka.options.js";
+import { createKafkaHeaders } from "../headers/kafka-header-builder.js";
+import type { KafkaEnvelope } from "../types/kafka-envelope.js";
+import { DEFAULT_KAFKA, KAFKA_HEADERS } from "../types/kafka-constants.js";
+import type {
+  KafkaEventType,
+  KafkaPayloadType,
+  KafkaTopicType,
+} from "../types/kafka-event.types.js";
+import { Inject, Injectable, OnModuleDestroy, Optional } from "@nestjs/common";
+import { ContextAccessor } from "@omnixys/context";
+import { OmnixysLogger } from "@omnixys/logger";
 import {
   KafkaTrace,
   TraceContextExtractor,
   W3CPropagator,
 } from "@omnixys/observability";
-import type { Message, Producer } from "kafkajs";
-import { KAFKA_PRODUCER } from "../core/kafka.constants.js";
-import type { KafkaEnvelope } from "../types/kafka-envelope.js";
+import type { IHeaders, Message, Producer, TopicMessages } from "kafkajs";
+import { randomUUID } from "node:crypto";
 
-import { createKafkaHeaders } from "../headers/kafka-header-builder.js";
-import { DEFAULT_KAFKA, KAFKA_HEADERS } from "../types/kafka-constants.js";
-import { KafkaEventRegistry } from "../types/kafka-event-registry.js";
-import { KafkaEventType, KafkaTopicType } from "../types/kafka-event.types.js";
+export type KafkaProducerStatus = "closing" | "ready" | "stopped";
+
+export interface KafkaProducerDiagnostics {
+  readonly status: KafkaProducerStatus;
+  readonly activeSends: number;
+}
+
+export interface RawKafkaMessage {
+  readonly topic: string;
+  readonly value: string;
+  readonly key?: string;
+  readonly headers?: Record<string, string | undefined>;
+}
 
 @Injectable()
-export class KafkaProducerService {
-  private readonly logger = new Logger(KafkaProducerService.name);
+export class KafkaProducerService implements OnModuleDestroy {
+  private activeSends = 0;
+  private connected = true;
+  private closing = false;
+  private closePromise?: Promise<void>;
+  private readonly drainWaiters = new Set<() => void>();
 
   constructor(
-    @Inject(KAFKA_PRODUCER)
-    private readonly producer: Producer,
+    @Inject(KAFKA_PRODUCER) private readonly producer: Producer,
+    @Optional()
+    @Inject(KAFKA_OPTIONS)
+    private readonly options?: KafkaModuleOptions,
+    @Optional() private readonly logger?: OmnixysLogger,
   ) {}
 
+  send<T extends KafkaTopicType>(input: KafkaEventType<T>): Promise<void>;
+  send<T extends KafkaTopicType>(
+    topic: T,
+    payload: KafkaPayloadType<T>,
+    service?: string,
+  ): Promise<void>;
   async send<T extends KafkaTopicType>(
-    input: KafkaEventType<T>,
+    inputOrTopic: KafkaEventType<T> | T,
+    payload?: KafkaPayloadType<T>,
+    service?: string,
   ): Promise<void> {
-    const { topic, payload, meta } = input;
-
-    const carrier = createKafkaHeaders();
-    KafkaTrace.inject(carrier);
-
-    const traceContext = TraceContextExtractor.current();
-
-    if (traceContext) {
-      // ✅ W3C Trace Context
-      new W3CPropagator().inject(carrier);
-
-      if (traceContext?.traceId)
-        carrier.set(KAFKA_HEADERS.TRACE_ID, traceContext.traceId);
-      if (traceContext?.spanId)
-        carrier.set(KAFKA_HEADERS.SPAN_ID, traceContext.spanId);
+    const input: KafkaEventType<T> =
+      typeof inputOrTopic === "string"
+        ? {
+            topic: inputOrTopic,
+            payload: payload as KafkaPayloadType<T>,
+            meta: service ? { service, type: "EVENT" } : undefined,
+          }
+        : inputOrTopic;
+    if (!ContextAccessor.get()) {
+      return ContextAccessor.run({ requestId: randomUUID() }, () =>
+        this.send(input),
+      );
     }
-
-    if (meta?.service) carrier.set(KAFKA_HEADERS.SERVICE, meta.service);
-    if (meta?.version) carrier.set(KAFKA_HEADERS.VERSION, meta.version);
-    if (meta?.clazz) carrier.set(KAFKA_HEADERS.CLASS, meta.clazz);
-    if (meta?.operation) carrier.set(KAFKA_HEADERS.OPERATION, meta.operation);
-    if (meta?.actorId) carrier.set(KAFKA_HEADERS.ACTOR_ID, meta.actorId);
-    if (meta?.tenantId) carrier.set(KAFKA_HEADERS.TENANT_ID, meta.tenantId);
-
-    carrier.set(KAFKA_HEADERS.TYPE, meta.type);
-
-    const headers = carrier.toKafkaHeaders();
-
-    const envelope: KafkaEnvelope<T> = {
-      eventId: crypto.randomUUID(),
-      eventName: topic,
-      eventType: meta.type,
-      eventVersion: meta.version ?? DEFAULT_KAFKA.VERSION,
-      service: meta.service ?? DEFAULT_KAFKA.UNKNOWN_SERVICE,
-      //operation: meta?.operation ?? "UKNOWN OPERATION",
-      timestamp: new Date().toISOString(),
-      payload,
-    };
-
-    const message: Message = {
-      value: JSON.stringify(envelope),
-      headers,
-    };
-
-    await KafkaTrace.produce(topic, async () => {
-      await this.sendMessage(topic, message);
-    });
-
-    // await KafkaTrace.produce(topic, async () => {
-    //   await this.producer.send({
-    //     topic,
-    //     messages: [
-    //       {
-    //         value: JSON.stringify(envelope),
-    //         headers: headers as any,
-    //       },
-    //     ],
-    //     //acks: -1,
-    //   });
-    // });
+    await KafkaTrace.produce(input.topic, () =>
+      this.sendMessage(input.topic, this.buildMessage(input)),
+    );
   }
 
-  /**
-   * Sends raw message (used for retry/DLQ).
-   *
-   * IMPORTANT:
-   * - Keeps original message intact
-   * - No re-wrapping
-   */
+  async sendBatch<T extends KafkaTopicType>(
+    inputs: ReadonlyArray<KafkaEventType<T>>,
+  ): Promise<void> {
+    if (inputs.length === 0) return;
+    if (!ContextAccessor.get()) {
+      return ContextAccessor.run({ requestId: randomUUID() }, () =>
+        this.sendBatch(inputs),
+      );
+    }
+    const byTopic = new Map<string, Message[]>();
+    await this.withSend(async () => {
+      await KafkaTrace.produce("batch", async () => {
+        for (const input of inputs) {
+          const messages = byTopic.get(input.topic) ?? [];
+          messages.push(this.buildMessage(input));
+          byTopic.set(input.topic, messages);
+        }
+        const topicMessages: TopicMessages[] = [...byTopic].map(
+          ([topic, messages]) => ({ topic, messages }),
+        );
+        await this.producer.sendBatch({ topicMessages, acks: -1 });
+      });
+      this.logger?.child(KafkaProducerService.name).debug("Kafka batch sent", {
+        messageCount: inputs.length,
+        topicCount: byTopic.size,
+      });
+    });
+  }
+
   async rawSend(
     topic: string,
     rawValue: string,
-    headers?: Record<string, string>,
+    headers?: Record<string, string | undefined>,
   ): Promise<void> {
     await this.sendMessage(topic, {
       value: rawValue,
@@ -105,61 +119,235 @@ export class KafkaProducerService {
     });
   }
 
-  /**
-   * Sends raw message with explicit headers.
-   *
-   * Used by retry service.
-   */
   async rawSendWithHeaders(
     topic: string,
     rawValue: string,
-    headers: Record<string, string>,
+    headers: Record<string, string | undefined>,
   ): Promise<void> {
-    await this.sendMessage(topic, {
-      value: rawValue,
-      headers: this.normalizeHeaders(headers),
+    return this.rawSend(topic, rawValue, headers);
+  }
+
+  async rawSendBatch(messages: ReadonlyArray<RawKafkaMessage>): Promise<void> {
+    if (messages.length === 0) return;
+    const grouped = new Map<string, Message[]>();
+    for (const message of messages) {
+      const topicMessages = grouped.get(message.topic) ?? [];
+      topicMessages.push({
+        key: message.key,
+        value: message.value,
+        headers: this.normalizeHeaders(message.headers),
+      });
+      grouped.set(message.topic, topicMessages);
+    }
+    await this.withSend(() =>
+      this.producer.sendBatch({
+        topicMessages: [...grouped].map(([topic, values]) => ({
+          topic,
+          messages: values,
+        })),
+        acks: -1,
+      }),
+    );
+  }
+
+  status(): KafkaProducerStatus {
+    if (this.closing) return "closing";
+    return this.connected ? "ready" : "stopped";
+  }
+
+  health() {
+    return { healthy: this.status() === "ready", status: this.status() };
+  }
+
+  diagnostics(): KafkaProducerDiagnostics {
+    return { status: this.status(), activeSends: this.activeSends };
+  }
+
+  async drain(timeoutMs = 10_000): Promise<void> {
+    if (this.activeSends === 0) return;
+    await new Promise<void>((resolve, reject) => {
+      const waiter = () => {
+        clearTimeout(timeout);
+        resolve();
+      };
+      const timeout = setTimeout(() => {
+        this.drainWaiters.delete(waiter);
+        reject(
+          new KafkaLifecycleError(
+            `Kafka producer drain timed out after ${timeoutMs}ms`,
+            { timeoutMs, activeSends: this.activeSends },
+          ),
+        );
+      }, timeoutMs);
+      this.drainWaiters.add(waiter);
     });
   }
 
-  /**
-   * Core send logic.
-   *
-   * Centralized to ensure:
-   * - consistent configuration
-   * - proper logging
-   * - future extensibility
-   */
-  private async sendMessage(topic: string, message: Message): Promise<void> {
-    try {
-      await this.producer.send({
-        topic,
-        messages: [message],
-        acks: -1,
-      });
+  flush(timeoutMs?: number): Promise<void> {
+    return this.drain(timeoutMs);
+  }
 
-      this.logger.debug(`Message sent → topic=${topic}`);
-    } catch (error) {
-      this.logger.error(
-        `Kafka send failed → topic=${topic}`,
-        error instanceof Error ? error.stack : undefined,
-      );
-      throw error;
+  close(): Promise<void> {
+    if (this.closePromise) return this.closePromise;
+    if (!this.connected) return Promise.resolve();
+    this.closePromise = this.closeInternal();
+    return this.closePromise;
+  }
+
+  shutdown(): Promise<void> {
+    return this.close();
+  }
+
+  onModuleDestroy(): Promise<void> {
+    return this.close();
+  }
+
+  private buildMessage<T extends KafkaTopicType>(
+    input: KafkaEventType<T>,
+  ): Message {
+    const context = ContextAccessor.get();
+    const meta = input.meta;
+    const carrier = createKafkaHeaders();
+    for (const [key, value] of Object.entries(input.headers ?? {})) {
+      carrier.set(key, value);
+    }
+    KafkaTrace.inject(carrier);
+    new W3CPropagator().inject(carrier);
+
+    const traceContext = TraceContextExtractor.current();
+    const traceId = context?.trace?.traceId ?? traceContext?.traceId;
+    const spanId = context?.trace?.spanId ?? traceContext?.spanId;
+    const actorId = context?.principal?.actorId ?? meta?.actorId;
+    const tenantId =
+      context?.tenant?.tenantId ??
+      context?.principal?.tenantId ??
+      meta?.tenantId;
+
+    setHeader(
+      carrier,
+      KAFKA_HEADERS.REQUEST_ID,
+      context?.requestId ?? "unscoped",
+    );
+    setHeader(
+      carrier,
+      KAFKA_HEADERS.CORRELATION_ID,
+      context?.correlationId ?? context?.requestId ?? "unscoped",
+    );
+    setHeader(carrier, KAFKA_HEADERS.TRACE_ID, traceId);
+    setHeader(carrier, KAFKA_HEADERS.SPAN_ID, spanId);
+    setHeader(carrier, KAFKA_HEADERS.ACTOR_ID, actorId);
+    setHeader(carrier, KAFKA_HEADERS.USER_ID, context?.principal?.userId);
+    setHeader(carrier, KAFKA_HEADERS.TENANT_ID, tenantId);
+    setHeader(
+      carrier,
+      KAFKA_HEADERS.SERVICE,
+      meta?.service ?? this.options?.serviceName,
+    );
+    setHeader(
+      carrier,
+      KAFKA_HEADERS.VERSION,
+      meta?.version ?? DEFAULT_KAFKA.VERSION,
+    );
+    setHeader(carrier, KAFKA_HEADERS.CLASS, meta?.clazz);
+    setHeader(
+      carrier,
+      KAFKA_HEADERS.OPERATION,
+      meta?.operation ?? context?.transport.operation,
+    );
+    setHeader(carrier, KAFKA_HEADERS.TYPE, meta?.type ?? "EVENT");
+
+    const envelope: KafkaEnvelope<T> = {
+      eventId: input.eventId ?? randomUUID(),
+      eventName: input.topic,
+      eventType: meta?.type ?? "EVENT",
+      eventVersion: meta?.version ?? DEFAULT_KAFKA.VERSION,
+      service:
+        meta?.service ??
+        this.options?.serviceName ??
+        DEFAULT_KAFKA.UNKNOWN_SERVICE,
+      timestamp: new Date().toISOString(),
+      payload: input.payload,
+    };
+
+    return {
+      key: input.key,
+      value: JSON.stringify(envelope),
+      headers: carrier.toKafkaHeaders(),
+    };
+  }
+
+  private async sendMessage(topic: string, message: Message): Promise<void> {
+    await this.withSend(async () => {
+      try {
+        await this.producer.send({ topic, messages: [message], acks: -1 });
+        this.logger
+          ?.child(KafkaProducerService.name)
+          .debug("Kafka message sent", {
+            topic,
+          });
+      } catch (error) {
+        this.logger
+          ?.child(KafkaProducerService.name)
+          .error("Kafka send failed", {
+            topic,
+            error,
+          });
+        throw error;
+      }
+    });
+  }
+
+  private normalizeHeaders(
+    headers?: Record<string, string | undefined>,
+  ): IHeaders | undefined {
+    if (!headers) return undefined;
+    return Object.fromEntries(
+      Object.entries(headers)
+        .filter((entry): entry is [string, string] => entry[1] !== undefined)
+        .map(([key, value]) => [key, Buffer.from(value)]),
+    );
+  }
+
+  private async withSend<T>(operation: () => Promise<T>): Promise<T> {
+    if (this.closing || !this.connected) {
+      throw new KafkaLifecycleError("Kafka producer is not ready", {
+        status: this.status(),
+      });
+    }
+    this.activeSends += 1;
+    try {
+      return await operation();
+    } finally {
+      this.activeSends -= 1;
+      if (this.activeSends === 0) {
+        for (const waiter of this.drainWaiters) waiter();
+        this.drainWaiters.clear();
+      }
     }
   }
 
-  /**
-   * Normalizes headers into Kafka-compatible format.
-   *
-   * Kafka requires:
-   * - Buffer values
-   */
-  private normalizeHeaders(
-    headers?: Record<string, string>,
-  ): Record<string, Buffer> | undefined {
-    if (!headers) return undefined;
-
-    return Object.fromEntries(
-      Object.entries(headers).map(([key, value]) => [key, Buffer.from(value)]),
-    );
+  private async closeInternal(): Promise<void> {
+    this.closing = true;
+    try {
+      await this.drain();
+    } finally {
+      try {
+        await this.producer.disconnect();
+        this.logger
+          ?.child(KafkaProducerService.name)
+          .info("Kafka producer closed");
+      } finally {
+        this.connected = false;
+        this.closing = false;
+      }
+    }
   }
+}
+
+function setHeader(
+  carrier: ReturnType<typeof createKafkaHeaders>,
+  key: string,
+  value: string | undefined,
+): void {
+  if (value !== undefined && value.length > 0) carrier.set(key, value);
 }

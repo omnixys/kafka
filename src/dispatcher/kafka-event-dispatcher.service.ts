@@ -1,147 +1,118 @@
-import { Injectable, Logger, OnApplicationBootstrap} from "@nestjs/common";
+import {
+  KAFKA_EVENT_METADATA,
+  KAFKA_HANDLER,
+} from "../core/kafka.constants.js";
+import { KafkaHandlerNotFoundError } from "../core/kafka.error.js";
+import type {
+  KafkaPayloadType,
+  KafkaTopicType,
+} from "../types/kafka-event.types.js";
+import type { IKafkaEventContext } from "../types/kafka-event.interface.js";
+import { Injectable, OnModuleInit, Optional } from "@nestjs/common";
 import { DiscoveryService, MetadataScanner, Reflector } from "@nestjs/core";
-import { KAFKA_EVENT_METADATA, KAFKA_HANDLER } from "../core/kafka.constants.js";
-import { KafkaPayloadType, KafkaTopicType, TypedKafkaHandler } from "../types/kafka-event.types.js";
-import { IKafkaEventContext } from "../types/kafka-event.interface.js";
+import { OmnixysLogger } from "@omnixys/logger";
 
-/**
- * Internal registry entry
- */
 interface HandlerEntry {
-  instance: Record<string, unknown>;
+  instance: Record<string, any>;
   methodName: string;
 }
-/**
- * KafkaEventDispatcherService
- *
- * Responsible for:
- * - Discovering Kafka handlers via decorators
- * - Registering topic → handler mappings
- * - Dispatching incoming Kafka events
- *
- * Uses NestJS DiscoveryService for safe and deterministic initialization.
- */
+
 @Injectable()
-export class KafkaEventDispatcherService implements OnApplicationBootstrap {
-  private readonly logger = new Logger(KafkaEventDispatcherService.name);
+export class KafkaEventDispatcherService implements OnModuleInit {
   private readonly handlers = new Map<string, HandlerEntry>();
+  private readyResolver!: () => void;
+  readonly ready = new Promise<void>((resolve) => {
+    this.readyResolver = resolve;
+  });
 
   constructor(
     private readonly discovery: DiscoveryService,
     private readonly scanner: MetadataScanner,
     private readonly reflector: Reflector,
+    @Optional() private readonly logger?: OmnixysLogger,
   ) {}
 
-  private readyResolver!: () => void;
-  public readonly ready = new Promise<void>((resolve) => {
-    this.readyResolver = resolve;
-  });
-
-  /**
-   * Initializes handler registry on application bootstrap.
-   */
-  onApplicationBootstrap(): void {
+  onModuleInit(): void {
     this.scanHandlers();
     this.readyResolver();
-    this.logger.log(`Kafka handlers registered: ${this.handlers.size}`);
+    this.logger
+      ?.child(KafkaEventDispatcherService.name)
+      .info("Kafka handlers registered", { handlerCount: this.handlers.size });
   }
 
-  /**
-   * Scans all providers for KafkaEvent decorators.
-   */
-  private scanHandlers() {
-    const providers = this.discovery.getProviders();
-
-    for (const wrapper of providers) {
-      const instance = wrapper.instance;
-      if (!instance) continue;
-
-      const isHandler = this.reflector.get<boolean>(
-        KAFKA_HANDLER,
-        instance.constructor,
-      );
-      //console.log({isHandler, provider: wrapper.name}) // clazzName
-
-      if (!isHandler) continue;
-
-      const prototype = Object.getPrototypeOf(instance);
-      let hasAtLeastOneHandler = false;
-
-      this.scanner.getAllMethodNames(prototype).forEach((methodName) => {
-        const methodRef = instance[methodName]; // ✅ FIX
-
-        const metadata = this.reflector.get<{ topics: string[] }>(
-          KAFKA_EVENT_METADATA,
-          methodRef,
-        );
-
-        if (!metadata) return;
-
-        hasAtLeastOneHandler = true;
-
-        for (const topic of metadata.topics) {
-          /**
-           * Prevent duplicate topic registration
-           */
-          if (this.handlers.has(topic)) {
-            const existing = this.handlers.get(topic)!;
-
-            throw new Error(
-              `Duplicate Kafka handler for topic "${topic}"\n` +
-                `Existing: ${existing.instance.constructor.name}.${existing.methodName}\n` +
-                `New: ${instance.constructor.name}.${methodName}`,
-            );
-          }
-
-          this.handlers.set(topic, { instance, methodName });
-          this.logger.debug(
-            `Registered Kafka handler → topic=${topic} handler=${instance.constructor.name}.${methodName}`,
-          );
-        }
-      });
-
-      /**
-       * Warn if handler class is marked but has no methods
-       */
-      if (!hasAtLeastOneHandler) {
-        this.logger.warn(
-          `KafkaEventHandler "${instance.constructor.name}" has no @KafkaEvent methods`,
-        );
-      }
-    }
-  }
-
-  /**
-   * Returns all registered Kafka topics.
-   */
   getRegisteredTopics(): string[] {
     return [...this.handlers.keys()];
   }
 
-  /**
-   * Dispatches a Kafka event to the correct handler.
-   */
+  hasHandler(topic: string): boolean {
+    return this.handlers.has(topic);
+  }
+
+  diagnostics() {
+    return {
+      handlerCount: this.handlers.size,
+      topics: this.getRegisteredTopics(),
+    };
+  }
+
   async dispatch<T extends KafkaTopicType>(
     topic: T,
     payload: KafkaPayloadType<T>,
     context: IKafkaEventContext,
   ): Promise<void> {
     const entry = this.handlers.get(topic);
+    if (!entry) throw new KafkaHandlerNotFoundError(String(topic));
 
-    if (!entry) {
-      this.logger.warn(`No handler found for topic=${topic}`);
-      return;
-    }
-
-      const method = entry.instance[entry.methodName] as (
-  payload: KafkaPayloadType<T>,
-  context: IKafkaEventContext,
-) => Promise<void> | void;
-
+    const method = entry.instance[entry.methodName] as (
+      ...args: any[]
+    ) => Promise<void> | void;
     if (typeof method !== "function") {
-      throw new Error(`Invalid handler for topic=${topic}`);
+      throw new Error(`Invalid Kafka handler for topic "${topic}"`);
     }
+    if (method.length >= 3) {
+      await method.call(entry.instance, topic, payload, context);
+    } else {
+      await method.call(entry.instance, payload, context);
+    }
+  }
 
-    await method.call(entry.instance, payload, context);
+  private scanHandlers(): void {
+    for (const wrapper of this.discovery.getProviders()) {
+      const instance = wrapper.instance as Record<string, any> | undefined;
+      if (!instance) continue;
+      if (!this.reflector.get<boolean>(KAFKA_HANDLER, instance.constructor))
+        continue;
+
+      const prototype = Object.getPrototypeOf(instance);
+      let found = false;
+      for (const methodName of this.scanner.getAllMethodNames(prototype)) {
+        const metadata = this.reflector.get<{ topics: string[] }>(
+          KAFKA_EVENT_METADATA,
+          instance[methodName],
+        );
+        if (!metadata) continue;
+        found = true;
+
+        for (const topic of metadata.topics) {
+          const existing = this.handlers.get(topic);
+          if (existing) {
+            throw new Error(
+              `Duplicate Kafka handler for topic "${topic}": ` +
+                `${existing.instance.constructor.name}.${existing.methodName} and ` +
+                `${instance.constructor.name}.${methodName}`,
+            );
+          }
+          this.handlers.set(topic, { instance, methodName });
+        }
+      }
+
+      if (!found) {
+        this.logger
+          ?.child(KafkaEventDispatcherService.name)
+          .warn("Kafka handler class has no event methods", {
+            handlerClass: instance.constructor.name,
+          });
+      }
+    }
   }
 }

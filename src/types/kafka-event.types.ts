@@ -11,14 +11,17 @@ export interface KafkaMetaInfo {
   clazz?: string;
   operation?: string;
   type: EventType;
-  actorId: string;
-  tenantId: string;
+  actorId?: string;
+  tenantId?: string;
 }
 
 export type KafkaEventType<T extends KafkaTopicType> = {
   topic: T;
   payload: KafkaPayloadType<T>;
-  meta: KafkaMetaInfo;
+  meta?: KafkaMetaInfo;
+  key?: string;
+  eventId?: string;
+  headers?: Record<string, string>;
 };
 
 /**

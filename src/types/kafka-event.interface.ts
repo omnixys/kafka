@@ -39,6 +39,12 @@ export interface IKafkaEventContext {
    * Kafka timestamp of the message
    */
   timestamp: string;
+
+  requestId?: string;
+  correlationId?: string;
+  actorId?: string;
+  tenantId?: string;
+  traceId?: string;
 }
 
 /**
@@ -53,7 +59,7 @@ export interface IKafkaEventHandler {
   handle(
     topic: string,
     payload: unknown,
-    context: IKafkaEventContext
+    context: IKafkaEventContext,
   ): Promise<void>;
 }
 
@@ -67,3 +73,6 @@ export type KafkaEventHandlerType = (
   payload: unknown,
   context: IKafkaEventContext,
 ) => Promise<void> | void;
+
+/** Compatibility alias retained for existing handler signatures. */
+export type KafkaEventContext = IKafkaEventContext;

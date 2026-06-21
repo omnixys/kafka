@@ -36,7 +36,11 @@ export const kafkaProducerProvider: Provider = {
   provide: KAFKA_PRODUCER,
   inject: [KAFKA_INSTANCE],
   useFactory: async (kafka: Kafka): Promise<Producer> => {
-    const producer = kafka.producer();
+    const producer = kafka.producer({
+      idempotent: true,
+      maxInFlightRequests: 1,
+      allowAutoTopicCreation: true,
+    });
     await producer.connect();
     return producer;
   },
@@ -45,7 +49,10 @@ export const kafkaProducerProvider: Provider = {
 export const kafkaConsumerProvider: Provider = {
   provide: KAFKA_CONSUMER,
   inject: [KAFKA_INSTANCE, KAFKA_OPTIONS],
-  useFactory: async (kafka: Kafka, options: KafkaModuleOptions): Promise<Consumer> => {
+  useFactory: async (
+    kafka: Kafka,
+    options: KafkaModuleOptions,
+  ): Promise<Consumer> => {
     const consumer = kafka.consumer({
       groupId: options.groupId,
     });

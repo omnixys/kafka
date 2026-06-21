@@ -1,103 +1,149 @@
-// src/kafka/consumer/kafka-retry.service.ts
-
-import { Injectable, Logger } from "@nestjs/common";
+import { KAFKA_OPTIONS } from "../core/kafka.constants.js";
+import type { KafkaModuleOptions } from "../core/kafka.options.js";
 import { KafkaProducerService } from "../producer/kafka-producer.service.js";
+import { KAFKA_RETRY_HEADERS } from "../types/kafka-constants.js";
+import { Inject, Injectable, Optional } from "@nestjs/common";
+import { OmnixysLogger } from "@omnixys/logger";
 
-/**
- * KafkaRetryService
- *
- * Handles retry and dead-letter logic for failed Kafka messages.
- *
- * Strategy:
- * - On failure → send message to retry topic
- * - Track retry attempts via headers
- * - If max retries exceeded → send to DLQ
- *
- * Topic Convention:
- * - main topic:           ticket.create
- * - retry topic:          ticket.create.retry
- * - dead letter topic:    ticket.create.dlq
- *
- * This ensures:
- * - No message loss
- * - Controlled retry behavior
- * - Observability for failures
- */
 @Injectable()
 export class KafkaRetryService {
-  private readonly logger = new Logger(KafkaRetryService.name);
+  constructor(
+    private readonly producer: KafkaProducerService,
+    @Optional()
+    @Inject(KAFKA_OPTIONS)
+    private readonly options?: KafkaModuleOptions,
+    @Optional() private readonly logger?: OmnixysLogger,
+  ) {}
 
-  /**
-   * Maximum retry attempts before sending to DLQ.
-   */
-  private readonly MAX_RETRIES = 5;
-
-  constructor(private readonly producer: KafkaProducerService) {}
-
-  /**
-   * Handles retry logic for a failed message.
-   *
-   * @param topic Original topic
-   * @param rawMessage Raw Kafka message value (stringified JSON)
-   * @param headers Kafka headers (used for retry count)
-   */
   async handleRetry(
     topic: string,
     rawMessage: string,
-    headers?: Record<string, string | undefined>,
+    headers: Record<string, string | undefined> = {},
+    error?: unknown,
   ): Promise<void> {
+    const originalTopic = this.originalTopic(topic, headers);
     const retryCount = this.extractRetryCount(headers);
 
-    if (retryCount >= this.MAX_RETRIES) {
-      this.logger.error(`Max retries reached → sending to DLQ (${topic}.dlq)`);
-
-      await this.sendToDLQ(topic, rawMessage, retryCount);
+    if (retryCount >= this.maxRetries) {
+      await this.sendToDLQ(
+        originalTopic,
+        rawMessage,
+        headers,
+        retryCount,
+        error,
+      );
       return;
     }
 
     const nextRetry = retryCount + 1;
-
-    this.logger.warn(
-      `Retrying message (${topic}) attempt ${nextRetry}/${this.MAX_RETRIES}`,
+    const delayMs = Math.min(
+      this.initialDelayMs * 2 ** Math.max(0, nextRetry - 1),
+      this.maxDelayMs,
     );
+    const nextHeaders = {
+      ...headers,
+      [KAFKA_RETRY_HEADERS.COUNT]: String(nextRetry),
+      [KAFKA_RETRY_HEADERS.ORIGINAL_TOPIC]: originalTopic,
+      [KAFKA_RETRY_HEADERS.RETRY_AT]: String(Date.now() + delayMs),
+      [KAFKA_RETRY_HEADERS.ERROR]: errorMessage(error),
+    };
 
-    await this.producer.rawSendWithHeaders(`${topic}.retry`, rawMessage, {
-      "x-retry-count": String(nextRetry),
-    });
+    await this.producer.rawSendWithHeaders(
+      this.retryTopic(originalTopic),
+      rawMessage,
+      nextHeaders,
+    );
+    this.logger
+      ?.child(KafkaRetryService.name)
+      .warn("Kafka message scheduled for retry", {
+        originalTopic,
+        retryCount: nextRetry,
+        maxRetries: this.maxRetries,
+        delayMs,
+      });
   }
 
-  /**
-   * Sends message to Dead Letter Queue.
-   *
-   * @param topic Original topic
-   * @param rawMessage Original message
-   * @param retries Number of retries performed
-   */
-  private async sendToDLQ(
-    topic: string,
+  async sendToDLQ(
+    originalTopic: string,
     rawMessage: string,
-    retries: number,
+    headers: Record<string, string | undefined> = {},
+    retries = this.extractRetryCount(headers),
+    error?: unknown,
   ): Promise<void> {
-    await this.producer.rawSendWithHeaders(`${topic}.dlq`, rawMessage, {
-      "x-retry-count": String(retries),
-      "x-error": "max-retries-exceeded",
-    });
+    await this.producer.rawSendWithHeaders(
+      this.deadLetterTopic(originalTopic),
+      rawMessage,
+      {
+        ...headers,
+        [KAFKA_RETRY_HEADERS.COUNT]: String(retries),
+        [KAFKA_RETRY_HEADERS.ORIGINAL_TOPIC]: originalTopic,
+        [KAFKA_RETRY_HEADERS.ERROR]:
+          errorMessage(error) ?? "max-retries-exceeded",
+      },
+    );
+    this.logger
+      ?.child(KafkaRetryService.name)
+      .error("Kafka message sent to DLQ", {
+        originalTopic,
+        retries,
+      });
   }
 
-  /**
-   * Extracts retry count from Kafka headers.
-   *
-   * Defaults to 0 if not present.
-   */
+  retryTopic(topic: string): string {
+    return `${topic}${this.options?.retry?.retryTopicSuffix ?? ".retry"}`;
+  }
+
+  deadLetterTopic(topic: string): string {
+    return `${topic}${this.options?.retry?.deadLetterTopicSuffix ?? ".dlq"}`;
+  }
+
+  retryTopics(topics: readonly string[]): string[] {
+    return topics.map((topic) => this.retryTopic(topic));
+  }
+
+  originalTopic(
+    topic: string,
+    headers: Record<string, string | undefined> = {},
+  ): string {
+    const explicit = headers[KAFKA_RETRY_HEADERS.ORIGINAL_TOPIC];
+    if (explicit) return explicit;
+    const suffix = this.options?.retry?.retryTopicSuffix ?? ".retry";
+    return topic.endsWith(suffix) ? topic.slice(0, -suffix.length) : topic;
+  }
+
+  diagnostics() {
+    return {
+      maxRetries: this.maxRetries,
+      initialDelayMs: this.initialDelayMs,
+      maxDelayMs: this.maxDelayMs,
+      retryTopicSuffix: this.options?.retry?.retryTopicSuffix ?? ".retry",
+      deadLetterTopicSuffix:
+        this.options?.retry?.deadLetterTopicSuffix ?? ".dlq",
+    };
+  }
+
   private extractRetryCount(
-    headers?: Record<string, string | undefined>,
+    headers: Record<string, string | undefined>,
   ): number {
-    if (!headers) return 0;
-
-    const value = headers["x-retry-count"];
-    if (!value) return 0;
-
-    const parsed = Number(value);
-    return Number.isNaN(parsed) ? 0 : parsed;
+    const parsed = Number(headers[KAFKA_RETRY_HEADERS.COUNT] ?? 0);
+    return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : 0;
   }
+
+  private get maxRetries(): number {
+    return this.options?.retry?.maxRetries ?? 5;
+  }
+
+  private get initialDelayMs(): number {
+    return this.options?.retry?.initialDelayMs ?? 1_000;
+  }
+
+  private get maxDelayMs(): number {
+    return this.options?.retry?.maxDelayMs ?? 60_000;
+  }
+}
+
+function errorMessage(error: unknown): string | undefined {
+  if (error === undefined) return undefined;
+  const message = error instanceof Error ? error.message : String(error);
+  return message.slice(0, 512);
 }

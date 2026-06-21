@@ -1,83 +1,67 @@
-// src/kafka/consumer/kafka-idempotency.service.ts
-
-import { Injectable, Logger } from "@nestjs/common";
+import { KAFKA_OPTIONS } from "../core/kafka.constants.js";
+import type { KafkaModuleOptions } from "../core/kafka.options.js";
+import { Inject, Injectable, Optional } from "@nestjs/common";
 import { ValkeyService } from "@omnixys/cache";
+import { OmnixysLogger } from "@omnixys/logger";
 
-/**
- * KafkaIdempotencyService
- *
- * Ensures that each Kafka event is processed exactly once from the application perspective.
- *
- * Kafka itself guarantees "at-least-once delivery", which means duplicates can occur.
- * This service prevents duplicate side effects (e.g. duplicate ticket creation).
- *
- * Strategy:
- * - Each event must contain a unique eventId
- * - Before processing → check if eventId already exists
- * - After successful processing → store eventId with TTL
- *
- * Storage:
- * - Valkey (Redis-compatible) is used for fast lookup
- *
- * TTL:
- * - Events are kept for 24 hours (configurable if needed)
- */
 @Injectable()
 export class KafkaIdempotencyService {
-  private readonly logger = new Logger(KafkaIdempotencyService.name);
+  private readonly memory = new Map<string, number>();
+  private warnedAboutFallback = false;
 
-  /**
-   * Default TTL for processed events in seconds.
-   * Prevents unbounded memory growth.
-   */
-  private readonly TTL_SECONDS = 60 * 60 * 24; // 24h
+  constructor(
+    @Optional() private readonly valkey?: ValkeyService,
+    @Optional()
+    @Inject(KAFKA_OPTIONS)
+    private readonly options?: KafkaModuleOptions,
+    @Optional() private readonly logger?: OmnixysLogger,
+  ) {}
 
-  constructor(private readonly valkey: ValkeyService) {}
-
-  /**
-   * Checks whether an event has already been processed.
-   *
-   * @param eventId Unique event identifier from Kafka envelope
-   */
   async isProcessed(eventId: string): Promise<boolean> {
-    if (!eventId) {
-      this.logger.warn("Missing eventId in idempotency check");
+    if (!eventId || this.options?.idempotency?.enabled === false) return false;
+    const key = this.buildKey(eventId);
+    if (this.valkey) return (await this.valkey.rawGet(key)) !== null;
+
+    const expiresAt = this.memory.get(key);
+    if (!expiresAt) return false;
+    if (expiresAt <= Date.now()) {
+      this.memory.delete(key);
       return false;
     }
-
-    const key = this.buildKey(eventId);
-
-    const result = await this.valkey.rawGet(key);
-
-    return result !== null;
+    return true;
   }
 
-  /**
-   * Marks an event as processed.
-   *
-   * Must only be called AFTER successful processing.
-   *
-   * @param eventId Unique event identifier
-   */
   async markProcessed(eventId: string): Promise<void> {
-    if (!eventId) {
-      this.logger.warn("Missing eventId in markProcessed");
+    if (!eventId || this.options?.idempotency?.enabled === false) return;
+    const key = this.buildKey(eventId);
+    if (this.valkey) {
+      await this.valkey.rawSet(key, "1", this.ttlSeconds);
       return;
     }
 
-    const key = this.buildKey(eventId);
-
-    await this.valkey.rawSet(key, "1", this.TTL_SECONDS);
+    this.memory.set(key, Date.now() + this.ttlSeconds * 1_000);
+    if (!this.warnedAboutFallback) {
+      this.warnedAboutFallback = true;
+      this.logger
+        ?.child(KafkaIdempotencyService.name)
+        .warn("Kafka idempotency is using process-local fallback storage");
+    }
   }
 
-  /**
-   * Builds a namespaced key for Valkey.
-   *
-   * Ensures:
-   * - No collisions
-   * - Easy debugging
-   */
+  diagnostics() {
+    return {
+      enabled: this.options?.idempotency?.enabled !== false,
+      storage: this.valkey ? "valkey" : "memory",
+      ttlSeconds: this.ttlSeconds,
+      memoryEntries: this.memory.size,
+    };
+  }
+
   private buildKey(eventId: string): string {
     return `kafka:idempotency:${eventId}`;
+  }
+
+  private get ttlSeconds(): number {
+    return this.options?.idempotency?.ttlSeconds ?? 86_400;
   }
 }

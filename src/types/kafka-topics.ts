@@ -38,7 +38,7 @@ export const KafkaTopics = {
     shutdown: `admin.shutdown.authentication`,
     deleteGuest: "invitation.deleteGuest.authentication",
     deleteGuestList: "invitation.deleteGuestList.authentication",
-    createGuest: 'invitation.createGuest.authentication',
+    createGuest: "invitation.createGuest.authentication",
   },
 
   event: {

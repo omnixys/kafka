@@ -31,7 +31,10 @@
     "registry": "https://npm.pkg.github.com"
   },
   "scripts": {
+    "prebuild": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
     "build": "tsc -p tsconfig.json",
+    "test": "pnpm run build && pnpm run test:types && node --test test/*.test.mjs",
+    "test:types": "tsc -p tsconfig.type-tests.json",
     "clean": "rimraf dist",
     "patch": "pnpm version patch",
     "release": "semantic-release",
@@ -48,7 +51,10 @@
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.4.2",
     "@nestjs/core": "^11.1.17",
-    "@omnixys/cache": "^1.0.0",
+    "@nestjs/common": "^11.1.19",
+    "@omnixys/cache": "file:../cache",
+    "@omnixys/context": "file:../context",
+    "@omnixys/logger": "file:../logger",
     "@omnixys/observability": "^1.0.0",
     "@omnixys/shared": "^1.0.0",
     "@semantic-release/changelog": "^6.0.3",
@@ -67,6 +73,8 @@
     "@nestjs/common": "^11.0.0",
     "@nestjs/core": "^11.1.17",
     "@omnixys/cache": "^1.0.0",
+    "@omnixys/context": "^1.0.0",
+    "@omnixys/logger": "^1.0.0",
     "@omnixys/observability": "^1.0.0",
     "@omnixys/shared": "^1.0.0"
   },

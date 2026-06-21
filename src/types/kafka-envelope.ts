@@ -10,5 +10,4 @@ export interface KafkaEnvelope<T extends KafkaTopicType = KafkaTopicType> {
   payload: KafkaPayloadType<T>;
 }
 
-
-export type EventType = 'EVENT' | 'LOG' | 'METRIC' | 'ALERT' | 'COMMAND';
+export type EventType = "EVENT" | "LOG" | "METRIC" | "ALERT" | "COMMAND";

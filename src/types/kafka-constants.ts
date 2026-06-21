@@ -36,11 +36,21 @@ export const KAFKA_HEADERS = {
   TYPE: "x-meta-type",
   ACTOR_ID: "x-meta-actorId",
   TENANT_ID: "x-meta-tenantId",
+  USER_ID: "x-meta-userId",
+  REQUEST_ID: "x-request-id",
+  CORRELATION_ID: "x-correlation-id",
 
   TRACE_ID: "x-meta-traceId",
   SPAN_ID: "x-meta-spanId",
   PARENT_SPAN_ID: "x-meta-parentSpanId",
   SAMPLED: "x-meta-sampled",
+} as const;
+
+export const KAFKA_RETRY_HEADERS = {
+  COUNT: "x-retry-count",
+  ORIGINAL_TOPIC: "x-original-topic",
+  RETRY_AT: "x-retry-at",
+  ERROR: "x-error",
 } as const;
 
 // -----------------------------

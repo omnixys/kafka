@@ -1,112 +1,88 @@
-// src/kafka/consumer/kafka-circuit-breaker.service.ts
+import { Injectable, Optional } from "@nestjs/common";
+import { OmnixysLogger } from "@omnixys/logger";
+import { KafkaFrameworkError } from "../core/kafka.error.js";
 
-import { Injectable, Logger } from "@nestjs/common";
+export type KafkaCircuitState = "CLOSED" | "HALF_OPEN" | "OPEN";
 
-/**
- * KafkaCircuitBreakerService
- *
- * Protects the system from repeated downstream failures.
- *
- * Without a circuit breaker:
- * - Kafka keeps delivering messages
- * - Handler keeps failing
- * - System overloads (DB / API / CPU)
- *
- * With circuit breaker:
- * - After threshold → circuit opens
- * - Incoming processing is temporarily blocked
- * - System gets time to recover
- *
- * States:
- * - CLOSED → normal operation
- * - OPEN → reject requests
- * - HALF-OPEN → test recovery
- */
+interface Circuit {
+  failures: number;
+  lastFailureTime: number;
+  state: KafkaCircuitState;
+}
+
+export class KafkaCircuitOpenError extends KafkaFrameworkError {
+  constructor(readonly circuit: string) {
+    super("KAFKA_CIRCUIT_OPEN", `Kafka circuit "${circuit}" is open`, {
+      circuit,
+    });
+    this.name = KafkaCircuitOpenError.name;
+  }
+}
+
 @Injectable()
 export class KafkaCircuitBreakerService {
-  private readonly logger = new Logger(KafkaCircuitBreakerService.name);
+  private readonly circuits = new Map<string, Circuit>();
 
-  private failures = 0;
-  private lastFailureTime = 0;
+  constructor(@Optional() private readonly logger?: OmnixysLogger) {}
 
-  private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
-
-  /**
-   * Configuration
-   */
-  private readonly FAILURE_THRESHOLD = 5;
-  private readonly RESET_TIMEOUT_MS = 10000; // 10 seconds
-
-  /**
-   * Executes a protected function within the circuit breaker.
-   */
-  async execute<T>(operation: () => Promise<T>): Promise<T> {
-    if (this.state === "OPEN") {
-      if (this.shouldAttemptReset()) {
-        this.state = "HALF_OPEN";
-        this.logger.warn("Circuit breaker transitioning to HALF_OPEN");
+  async execute<T>(
+    operation: () => Promise<T>,
+    circuitName = "default",
+  ): Promise<T> {
+    const circuit = this.getCircuit(circuitName);
+    if (circuit.state === "OPEN") {
+      if (Date.now() - circuit.lastFailureTime > 10_000) {
+        circuit.state = "HALF_OPEN";
       } else {
-        this.logger.error("Circuit breaker OPEN → rejecting execution");
-        throw new Error("Circuit breaker is OPEN");
+        throw new KafkaCircuitOpenError(circuitName);
       }
     }
 
     try {
       const result = await operation();
-
-      this.onSuccess();
-
+      circuit.failures = 0;
+      circuit.lastFailureTime = 0;
+      circuit.state = "CLOSED";
       return result;
     } catch (error) {
-      this.onFailure(error);
+      circuit.failures += 1;
+      circuit.lastFailureTime = Date.now();
+      if (circuit.failures >= 5) circuit.state = "OPEN";
+      this.logger
+        ?.child(KafkaCircuitBreakerService.name)
+        .error("Kafka handler circuit recorded a failure", {
+          circuit: circuitName,
+          failures: circuit.failures,
+          error,
+        });
       throw error;
     }
   }
 
-  /**
-   * Called when operation succeeds.
-   */
-  private onSuccess(): void {
-    if (this.state === "HALF_OPEN") {
-      this.logger.log("Circuit breaker CLOSED after successful test");
-      this.reset();
-      return;
-    }
-
-    this.failures = 0;
+  status(circuitName = "default"): KafkaCircuitState {
+    return this.getCircuit(circuitName).state;
   }
 
-  /**
-   * Called when operation fails.
-   */
-  private onFailure(error: unknown): void {
-    this.failures++;
-    this.lastFailureTime = Date.now();
+  reset(circuitName?: string): void {
+    if (circuitName) this.circuits.delete(circuitName);
+    else this.circuits.clear();
+  }
 
-    this.logger.error(
-      `Circuit breaker failure (${this.failures}/${this.FAILURE_THRESHOLD})`,
-      error instanceof Error ? error.stack : undefined,
+  diagnostics() {
+    return Object.fromEntries(
+      [...this.circuits].map(([name, circuit]) => [name, { ...circuit }]),
     );
-
-    if (this.failures >= this.FAILURE_THRESHOLD) {
-      this.state = "OPEN";
-      this.logger.error("Circuit breaker switched to OPEN");
-    }
   }
 
-  /**
-   * Determines whether the system should attempt recovery.
-   */
-  private shouldAttemptReset(): boolean {
-    return Date.now() - this.lastFailureTime > this.RESET_TIMEOUT_MS;
-  }
-
-  /**
-   * Resets the circuit breaker to normal state.
-   */
-  private reset(): void {
-    this.failures = 0;
-    this.state = "CLOSED";
-    this.lastFailureTime = 0;
+  private getCircuit(name: string): Circuit {
+    const existing = this.circuits.get(name);
+    if (existing) return existing;
+    const circuit: Circuit = {
+      failures: 0,
+      lastFailureTime: 0,
+      state: "CLOSED",
+    };
+    this.circuits.set(name, circuit);
+    return circuit;
   }
 }
