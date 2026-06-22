@@ -10,6 +10,7 @@ import type {
   KafkaTopicType,
 } from "../types/kafka-event.types.js";
 import { Inject, Injectable, OnModuleDestroy, Optional } from "@nestjs/common";
+import { ModuleRef } from "@nestjs/core";
 import { ContextAccessor } from "@omnixys/context";
 import { OmnixysLogger } from "@omnixys/logger";
 import {
@@ -47,7 +48,7 @@ export class KafkaProducerService implements OnModuleDestroy {
     @Optional()
     @Inject(KAFKA_OPTIONS)
     private readonly options?: KafkaModuleOptions,
-    @Optional() private readonly logger?: OmnixysLogger,
+    @Optional() private readonly moduleRef?: ModuleRef,
   ) {}
 
   send<T extends KafkaTopicType>(input: KafkaEventType<T>): Promise<void>;
@@ -340,6 +341,14 @@ export class KafkaProducerService implements OnModuleDestroy {
         this.connected = false;
         this.closing = false;
       }
+    }
+  }
+
+  private get logger(): OmnixysLogger | undefined {
+    try {
+      return this.moduleRef?.get(OmnixysLogger, { strict: false });
+    } catch {
+      return undefined;
     }
   }
 }
