@@ -3,6 +3,18 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.0.0](https://github.com/omnixys/kafka/compare/v1.0.0...v2.0.0) (2026-06-23)
+
+### Kafka
+
+* **Kafka:** declare runtime peer dependencies ([](https://github.com/omnixys/kafka/commit/cbf3559c35b5f348be345244ebe5d0305a2c2092))
+* **Kafka:** add reliable retries and graceful lifecycle ([](https://github.com/omnixys/kafka/commit/f434f019ea47077f46c00265f3401f268a625c0e))
+* **Kafka:** expose package-neutral publisher token ([](https://github.com/omnixys/kafka/commit/8e06b98857b0248b9cf37549ffdb54e7f7bd8417))
+* **Kafka:** register event media upload topic ([](https://github.com/omnixys/kafka/commit/712c19b2cddcd8f323e14a86e9088f21dc142023))
+* **Kafka:** register event milestone topic ([](https://github.com/omnixys/kafka/commit/5f8277ac2bc67ab3ead0e6d480925c70308ea9ad))
+* **Kafka:** break logger producer dependency cycle ([](https://github.com/omnixys/kafka/commit/02fe84b45c73747926f5e7ce7e83b3911f98c5f7))
+* **Kafka:** consume canonical event contracts ([](https://github.com/omnixys/kafka/commit/fc9af032a575415f54101df51d4c2965a28a52b4))
+
 ## 1.0.0 (2026-04-25)
 
 ### ⚠ BREAKING CHANGE
