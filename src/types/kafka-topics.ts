@@ -51,6 +51,11 @@ export const KafkaTopics = {
     delete: "authentication.delete.event",
     mediaUploaded: "event.media.uploaded",
     milestoneRecorded: "event.milestone.recorded",
+
+    roleAssigned: "event.role.assigned",
+    roleRemoved: "event.role.removed",
+    ownerChanged: "event.owner.changed",
+    deleted: "event.deleted",
   },
 
   gateway: {
