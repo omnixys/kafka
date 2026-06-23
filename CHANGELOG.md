@@ -3,6 +3,16 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.0.1](https://github.com/omnixys/kafka/compare/v2.0.0...v2.0.1) (2026-06-23)
+
+### Dep
+
+* **Dep:** update dependencies ([](https://github.com/omnixys/kafka/commit/2262920611b083e7fce214d68160381ede37326e))
+
+### Other
+
+* **Other:** Merge branch 'main' of https://github.com/omnixys/kafka ([](https://github.com/omnixys/kafka/commit/ebb767d997871c0bc95f790d68d726ac6f57d95e))
+
 ## [2.0.0](https://github.com/omnixys/kafka/compare/v1.0.0...v2.0.0) (2026-06-23)
 
 ### Kafka
