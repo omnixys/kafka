@@ -26,6 +26,8 @@ test("producer propagates canonical context and emits a stable envelope", async 
     serviceName: "users-service",
   });
 
+  await producer.onModuleInit();
+
   await ContextAccessor.run(
     {
       requestId: "request-1",
@@ -72,6 +74,7 @@ test("event media uploads have a stable canonical topic", () => {
 test("producer batches by topic and exposes graceful lifecycle APIs", async () => {
   const transport = createProducerTransport();
   const producer = new KafkaProducerService(transport);
+  await producer.onModuleInit();
   await producer.send(
     KafkaTopics.user.deleteUser,
     { userId: "legacy-user" },
@@ -373,6 +376,7 @@ function createProducerTransport() {
     async sendBatch(value) {
       this.batches.push(value);
     },
+    async connect() {},
     async disconnect() {
       this.disconnectCalls += 1;
     },

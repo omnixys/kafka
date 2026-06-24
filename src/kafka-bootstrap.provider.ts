@@ -35,13 +35,12 @@ export const kafkaInstanceProvider: Provider = {
 export const kafkaProducerProvider: Provider = {
   provide: KAFKA_PRODUCER,
   inject: [KAFKA_INSTANCE],
-  useFactory: async (kafka: Kafka): Promise<Producer> => {
+  useFactory: (kafka: Kafka): Producer => {
     const producer = kafka.producer({
       idempotent: true,
       maxInFlightRequests: 1,
       allowAutoTopicCreation: true,
     });
-    await producer.connect();
     return producer;
   },
 };

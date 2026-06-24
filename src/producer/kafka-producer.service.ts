@@ -9,7 +9,7 @@ import type {
   KafkaPayloadType,
   KafkaTopicType,
 } from "../types/kafka-event.types.js";
-import { Inject, Injectable, OnModuleDestroy, Optional } from "@nestjs/common";
+import { Inject, Injectable, OnModuleDestroy, OnModuleInit, Optional } from "@nestjs/common";
 import { ModuleRef } from "@nestjs/core";
 import { ContextAccessor } from "@omnixys/context";
 import { OmnixysLogger } from "@omnixys/logger";
@@ -36,12 +36,14 @@ export interface RawKafkaMessage {
 }
 
 @Injectable()
-export class KafkaProducerService implements OnModuleDestroy {
+export class KafkaProducerService implements OnModuleDestroy, OnModuleInit {
   private activeSends = 0;
-  private connected = true;
+  private connecting?: Promise<void>;
+  private connected = false;
   private closing = false;
   private closePromise?: Promise<void>;
   private readonly drainWaiters = new Set<() => void>();
+  private sendQueue = Promise.resolve();
 
   constructor(
     @Inject(KAFKA_PRODUCER) private readonly producer: Producer,
@@ -50,6 +52,20 @@ export class KafkaProducerService implements OnModuleDestroy {
     private readonly options?: KafkaModuleOptions,
     @Optional() private readonly moduleRef?: ModuleRef,
   ) {}
+
+  async onModuleInit(): Promise<void> {
+    if (this.connecting) {
+      return this.connecting;
+    }
+    if (this.connected) {
+      return;
+    }
+    this.connecting = this.producer.connect().then(() => {
+      this.connected = true;
+      this.connecting = undefined;
+    });
+    return this.connecting;
+  }
 
   send<T extends KafkaTopicType>(input: KafkaEventType<T>): Promise<void>;
   send<T extends KafkaTopicType>(
@@ -316,9 +332,21 @@ export class KafkaProducerService implements OnModuleDestroy {
       });
     }
     this.activeSends += 1;
+    const prev = this.sendQueue;
+    let release: () => void;
+    this.sendQueue = new Promise<void>((resolve) => {
+      release = resolve;
+    });
     try {
+      await prev;
+      if (this.closing || !this.connected) {
+        throw new KafkaLifecycleError("Kafka producer is not ready", {
+          status: this.status(),
+        });
+      }
       return await operation();
     } finally {
+      release!();
       this.activeSends -= 1;
       if (this.activeSends === 0) {
         for (const waiter of this.drainWaiters) waiter();
@@ -332,15 +360,17 @@ export class KafkaProducerService implements OnModuleDestroy {
     try {
       await this.drain();
     } finally {
-      try {
-        await this.producer.disconnect();
-        this.logger
-          ?.child(KafkaProducerService.name)
-          .info("Kafka producer closed");
-      } finally {
-        this.connected = false;
-        this.closing = false;
+      if (this.connected) {
+        try {
+          await this.producer.disconnect();
+          this.logger
+            ?.child(KafkaProducerService.name)
+            .info("Kafka producer closed");
+        } finally {
+          this.connected = false;
+        }
       }
+      this.closing = false;
     }
   }
 

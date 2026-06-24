@@ -31,6 +31,7 @@ test("Kafka-backed logger and producer compile without a dependency cycle", asyn
         useValue: {
           send: async () => undefined,
           sendBatch: async () => undefined,
+          connect: async () => undefined,
           disconnect: async () => undefined,
         },
       },
