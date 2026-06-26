@@ -13,6 +13,10 @@ import {
   KafkaProducerService,
   KafkaRetryService,
   KafkaTopics,
+  getAllKafkaTopics,
+  getKafkaTopicCatalog,
+  inferKafkaTopicPolicy,
+  validateKafkaTopicCatalog,
 } from "../dist/index.js";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -69,6 +73,50 @@ test("event media uploads have a stable canonical topic", () => {
     KafkaTopics.event.milestoneRecorded,
     "event.milestone.recorded",
   );
+});
+
+test("topic catalog is deterministic, unique, and policy-aware", () => {
+  const catalog = getKafkaTopicCatalog();
+  const validation = validateKafkaTopicCatalog(catalog);
+  const topics = catalog.topics.map((entry) => entry.topic);
+
+  assert.equal(validation.valid, true, validation.errors.join("\n"));
+  assert.deepEqual(validation.warnings, []);
+  assert.deepEqual(topics, [...topics].sort((left, right) => left.localeCompare(right)));
+  assert.equal(new Set(topics).size, topics.length);
+  assert.deepEqual(new Set(getAllKafkaTopics()), new Set(topics));
+
+  const createUser = catalog.topics.find(
+    (entry) => entry.topic === KafkaTopics.user.createUser,
+  );
+  assert.deepEqual(createUser?.producers, ["authentication"]);
+  assert.deepEqual(createUser?.consumers, ["user"]);
+  assert.equal(createUser?.owner, "user");
+
+  const retry = catalog.topics.find(
+    (entry) => entry.topic === KafkaTopics.whatsapp.retry,
+  );
+  assert.equal(retry?.policy, "retry");
+
+  const dlq = catalog.topics.find(
+    (entry) => entry.topic === KafkaTopics.whatsapp.dlq,
+  );
+  assert.equal(dlq?.policy, "dlq");
+  assert.equal(dlq?.config["retention.ms"], "2592000000");
+
+  const logstream = catalog.topics.find(
+    (entry) => entry.topic === KafkaTopics.logstream.log,
+  );
+  assert.equal(logstream?.policy, "logstream");
+  assert.equal(logstream?.partitions, 3);
+});
+
+test("topic policy inference handles retry, DLQ, compacted, and logstream topics", () => {
+  assert.equal(inferKafkaTopicPolicy("notification.retry.whatsapp"), "retry");
+  assert.equal(inferKafkaTopicPolicy("notification.dlq.whatsapp"), "dlq");
+  assert.equal(inferKafkaTopicPolicy("logstream.log"), "logstream");
+  assert.equal(inferKafkaTopicPolicy("user.profile.compacted"), "compacted");
+  assert.equal(inferKafkaTopicPolicy("authentication.create.user"), "default");
 });
 
 test("producer batches by topic and exposes graceful lifecycle APIs", async () => {

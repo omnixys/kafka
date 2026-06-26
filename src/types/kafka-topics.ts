@@ -134,6 +134,164 @@ export const KafkaTopics = {
  */
 export type KafkaTopicsType = typeof KafkaTopics;
 
+export type KafkaTopicConfigValue = string | number | boolean;
+
+export type KafkaTopicConfig = Record<string, KafkaTopicConfigValue>;
+
+export type KafkaTopicPolicyName =
+  | "default"
+  | "retry"
+  | "dlq"
+  | "compacted"
+  | "logstream";
+
+export interface KafkaTopicPolicy {
+  partitions: number;
+  replicas: number;
+  config: KafkaTopicConfig;
+}
+
+export interface KafkaTopicMetadata {
+  owner?: string;
+  domain?: string;
+  description?: string;
+  version?: number;
+  producers?: readonly string[];
+  consumers?: readonly string[];
+  policy?: KafkaTopicPolicyName;
+  partitions?: number;
+  replicas?: number;
+  config?: KafkaTopicConfig;
+}
+
+export interface KafkaTopicCatalogEntry {
+  topic: string;
+  domain: string;
+  key: string;
+  owner: string;
+  description: string;
+  version: number;
+  producers: readonly string[];
+  consumers: readonly string[];
+  policy: KafkaTopicPolicyName;
+  partitions: number;
+  replicas: number;
+  config: KafkaTopicConfig;
+}
+
+export interface KafkaTopicCatalog {
+  defaults: KafkaTopicPolicy;
+  policies: Record<KafkaTopicPolicyName, KafkaTopicPolicy>;
+  topics: KafkaTopicCatalogEntry[];
+}
+
+export interface KafkaTopicValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+}
+
+export const KafkaTopicMutableConfigKeys = [
+  "cleanup.policy",
+  "retention.ms",
+  "retention.bytes",
+  "compression.type",
+  "max.message.bytes",
+  "segment.bytes",
+] as const;
+
+export const KafkaTopicSupportedConfigKeys = [
+  ...KafkaTopicMutableConfigKeys,
+  "delete.retention.ms",
+  "max.compaction.lag.ms",
+  "message.timestamp.type",
+  "min.cleanable.dirty.ratio",
+  "min.compaction.lag.ms",
+  "min.insync.replicas",
+] as const;
+
+const supportedConfigKeys = new Set<string>(KafkaTopicSupportedConfigKeys);
+
+export const KafkaTopicPolicies: Record<KafkaTopicPolicyName, KafkaTopicPolicy> = {
+  default: {
+    partitions: 1,
+    replicas: 1,
+    config: {
+      "cleanup.policy": "delete",
+      "compression.type": "producer",
+      "retention.ms": "604800000",
+    },
+  },
+  retry: {
+    partitions: 1,
+    replicas: 1,
+    config: {
+      "cleanup.policy": "delete",
+      "compression.type": "producer",
+      "retention.ms": "86400000",
+    },
+  },
+  dlq: {
+    partitions: 1,
+    replicas: 1,
+    config: {
+      "cleanup.policy": "delete",
+      "compression.type": "producer",
+      "retention.ms": "2592000000",
+    },
+  },
+  compacted: {
+    partitions: 1,
+    replicas: 1,
+    config: {
+      "cleanup.policy": "compact",
+      "compression.type": "producer",
+      "retention.ms": "-1",
+    },
+  },
+  logstream: {
+    partitions: 3,
+    replicas: 1,
+    config: {
+      "cleanup.policy": "delete",
+      "compression.type": "producer",
+      "retention.ms": "604800000",
+    },
+  },
+} as const;
+
+export const KafkaTopicMetadataRegistry = {
+  logstream: {
+    log: {
+      owner: "observability",
+      description: "Central application log ingestion topic.",
+      policy: "logstream",
+      producers: ["omnixys-services"],
+      consumers: ["logstream"],
+    },
+  },
+  whatsapp: {
+    retry: {
+      owner: "notification",
+      description: "Retry queue for outbound WhatsApp notifications.",
+      policy: "retry",
+      producers: ["notification"],
+      consumers: ["notification"],
+    },
+    dlq: {
+      owner: "notification",
+      description: "Dead-letter queue for failed WhatsApp notifications.",
+      policy: "dlq",
+      producers: ["notification"],
+      consumers: ["notification"],
+    },
+  },
+} satisfies Partial<{
+  [D in keyof KafkaTopicsType]: Partial<
+    Record<keyof KafkaTopicsType[D], KafkaTopicMetadata>
+  >;
+}>;
+
 /**
  * Returns all Kafka topics defined in the registry.
  * Useful for consumer subscriptions.
@@ -147,6 +305,179 @@ export function getAllKafkaTopics(): string[] {
     );
 
   return flatten(KafkaTopics);
+}
+
+export function getKafkaTopicCatalog(): KafkaTopicCatalog {
+  const topics = Object.entries(KafkaTopics).flatMap(([domain, entries]) =>
+    Object.entries(entries).map(([key, topic]) => {
+      const metadata = getMetadata(domain, key);
+      const policy = metadata.policy ?? inferKafkaTopicPolicy(topic);
+      const policyDefaults = KafkaTopicPolicies[policy];
+      const partitions = metadata.partitions ?? policyDefaults.partitions;
+      const replicas = metadata.replicas ?? policyDefaults.replicas;
+      const inferredOwnership = inferKafkaTopicOwnership(topic, domain);
+
+      return {
+        topic,
+        domain: metadata.domain ?? domain,
+        key,
+        owner: metadata.owner ?? inferredOwnership.owner,
+        description:
+          metadata.description ?? describeKafkaTopic(topic, domain, key, policy),
+        version: metadata.version ?? 1,
+        producers: metadata.producers ?? inferredOwnership.producers,
+        consumers: metadata.consumers ?? inferredOwnership.consumers,
+        policy,
+        partitions,
+        replicas,
+        config: {
+          ...policyDefaults.config,
+          ...(metadata.config ?? {}),
+        },
+      } satisfies KafkaTopicCatalogEntry;
+    }),
+  );
+
+  topics.sort((left, right) => left.topic.localeCompare(right.topic));
+
+  return {
+    defaults: KafkaTopicPolicies.default,
+    policies: KafkaTopicPolicies,
+    topics,
+  };
+}
+
+export function validateKafkaTopicCatalog(
+  catalog: KafkaTopicCatalog = getKafkaTopicCatalog(),
+): KafkaTopicValidationResult {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const seenTopics = new Map<string, string>();
+
+  for (const entry of catalog.topics) {
+    const path = `${entry.domain}.${entry.key}`;
+
+    if (!entry.topic || entry.topic.trim().length === 0) {
+      errors.push(`${path}: topic name must not be empty`);
+      continue;
+    }
+
+    if (!isValidKafkaTopicName(entry.topic)) {
+      errors.push(`${path}: invalid Kafka topic name '${entry.topic}'`);
+    }
+
+    const previousPath = seenTopics.get(entry.topic);
+    if (previousPath) {
+      errors.push(
+        `${path}: duplicate topic '${entry.topic}' already declared at ${previousPath}`,
+      );
+    } else {
+      seenTopics.set(entry.topic, path);
+    }
+
+    if (!Number.isInteger(entry.partitions) || entry.partitions < 1) {
+      errors.push(`${path}: partitions must be a positive integer`);
+    }
+
+    if (!Number.isInteger(entry.replicas) || entry.replicas < 1) {
+      errors.push(`${path}: replicas must be a positive integer`);
+    }
+
+    for (const [key, value] of Object.entries(entry.config)) {
+      if (!supportedConfigKeys.has(key)) {
+        errors.push(`${path}: unsupported topic config '${key}'`);
+      }
+
+      if (!isValidConfigValue(value)) {
+        errors.push(`${path}: topic config '${key}' has an invalid value`);
+      }
+    }
+
+    if (entry.consumers.length === 0) {
+      warnings.push(`${path}: no consumers declared`);
+    }
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors,
+    warnings,
+  };
+}
+
+export function inferKafkaTopicPolicy(topic: string): KafkaTopicPolicyName {
+  if (topic.startsWith("logstream.")) {
+    return "logstream";
+  }
+
+  if (topic.includes(".dlq.") || topic.endsWith(".dlq")) {
+    return "dlq";
+  }
+
+  if (topic.includes(".retry.") || topic.endsWith(".retry")) {
+    return "retry";
+  }
+
+  if (topic.includes(".compact.") || topic.endsWith(".compacted")) {
+    return "compacted";
+  }
+
+  return "default";
+}
+
+export function isValidKafkaTopicName(topic: string): boolean {
+  return (
+    topic.length > 0 &&
+    topic.length <= 249 &&
+    topic !== "." &&
+    topic !== ".." &&
+    /^[A-Za-z0-9._-]+$/.test(topic)
+  );
+}
+
+function getMetadata(domain: string, key: string): KafkaTopicMetadata {
+  const registry = KafkaTopicMetadataRegistry as Record<
+    string,
+    Record<string, KafkaTopicMetadata> | undefined
+  >;
+
+  return registry[domain]?.[key] ?? {};
+}
+
+function inferKafkaTopicOwnership(
+  topic: string,
+  fallbackDomain: string,
+): Pick<KafkaTopicCatalogEntry, "owner" | "producers" | "consumers"> {
+  const [source, , target] = topic.split(".");
+  const producer = source && source !== "all" ? source : fallbackDomain;
+  const consumer = target && target !== source ? target : fallbackDomain;
+
+  return {
+    owner: consumer,
+    producers: [producer],
+    consumers: [consumer],
+  };
+}
+
+function describeKafkaTopic(
+  topic: string,
+  domain: string,
+  key: string,
+  policy: KafkaTopicPolicyName,
+): string {
+  return `${domain}.${key} Kafka topic contract for ${topic} using the ${policy} policy.`;
+}
+
+function isValidConfigValue(value: KafkaTopicConfigValue): boolean {
+  if (typeof value === "string") {
+    return value.trim().length > 0;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value);
+  }
+
+  return typeof value === "boolean";
 }
 
 /**
