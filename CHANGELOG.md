@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.1.0](https://github.com/omnixys/kafka/compare/v2.0.2...v2.1.0) (2026-06-26)
+
+### Manager
+
+* **Manager:** kafka topic manager support ([](https://github.com/omnixys/kafka/commit/e8780cbd229a0e2a6d0be2d381e74ce1ff464a3b))
+
 ## [2.0.2](https://github.com/omnixys/kafka/compare/v2.0.1...v2.0.2) (2026-06-24)
 
 ### Runtime
