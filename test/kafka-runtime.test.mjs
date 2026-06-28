@@ -15,6 +15,7 @@ import {
   KafkaTopics,
   getAllKafkaTopics,
   getKafkaTopicCatalog,
+  getKafkaTopicReconciliationCatalog,
   inferKafkaTopicPolicy,
   validateKafkaTopicCatalog,
 } from "../dist/index.js";
@@ -111,6 +112,33 @@ test("topic catalog is deterministic, unique, and policy-aware", () => {
   assert.equal(logstream?.partitions, 3);
 });
 
+test("topic reconciliation catalog includes runtime retry and DLQ topics without nested failure topics", () => {
+  const baseCatalog = getKafkaTopicCatalog();
+  const catalog = getKafkaTopicReconciliationCatalog();
+  const validation = validateKafkaTopicCatalog(catalog);
+  const topics = catalog.topics.map((entry) => entry.topic);
+
+  assert.equal(validation.valid, true, validation.errors.join("\n"));
+  assert.equal(new Set(topics).size, topics.length);
+
+  for (const entry of baseCatalog.topics) {
+    assert.equal(topics.includes(entry.topic), true, entry.topic);
+  }
+
+  const base = KafkaTopics.user.createUser;
+  const retry = catalog.topics.find((entry) => entry.topic === `${base}.retry`);
+  const dlq = catalog.topics.find((entry) => entry.topic === `${base}.dlq`);
+
+  assert.equal(retry?.policy, "retry");
+  assert.equal(retry?.config["retention.ms"], "86400000");
+  assert.equal(dlq?.policy, "dlq");
+  assert.equal(dlq?.config["retention.ms"], "2592000000");
+  assert.equal(topics.includes(`${KafkaTopics.whatsapp.retry}.retry`), false);
+  assert.equal(topics.includes(`${KafkaTopics.whatsapp.retry}.dlq`), false);
+  assert.equal(topics.includes(`${KafkaTopics.whatsapp.dlq}.retry`), false);
+  assert.equal(catalog.topics.length > baseCatalog.topics.length, true);
+});
+
 test("topic policy inference handles retry, DLQ, compacted, and logstream topics", () => {
   assert.equal(inferKafkaTopicPolicy("notification.retry.whatsapp"), "retry");
   assert.equal(inferKafkaTopicPolicy("notification.dlq.whatsapp"), "dlq");
@@ -191,6 +219,19 @@ test("retry policy preserves headers, avoids nested retry topics, and routes to 
   assert.equal(calls[1].topic, "orders.dlq");
   assert.equal(calls[1].headers["x-retry-count"], "2");
   assert.equal(calls[1].headers["x-error"], "final");
+  assert.equal(
+    retry.retryTopic(KafkaTopics.whatsapp.retry),
+    KafkaTopics.whatsapp.retry,
+  );
+  assert.equal(
+    retry.deadLetterTopic(KafkaTopics.whatsapp.retry),
+    KafkaTopics.whatsapp.dlq,
+  );
+  assert.deepEqual(retry.retryTopics([
+    KafkaTopics.whatsapp.outgoing,
+    KafkaTopics.whatsapp.retry,
+    KafkaTopics.whatsapp.dlq,
+  ]), [`${KafkaTopics.whatsapp.outgoing}.retry`]);
 });
 
 test("consumer subscribes to retry topics and restores canonical context for batches", async () => {

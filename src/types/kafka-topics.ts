@@ -191,6 +191,16 @@ export interface KafkaTopicValidationResult {
   warnings: string[];
 }
 
+export const DEFAULT_KAFKA_RETRY_TOPIC_SUFFIX = ".retry";
+export const DEFAULT_KAFKA_DEAD_LETTER_TOPIC_SUFFIX = ".dlq";
+
+export interface KafkaTopicExpansionOptions {
+  includeRetryTopics?: boolean;
+  includeDeadLetterTopics?: boolean;
+  retryTopicSuffix?: string;
+  deadLetterTopicSuffix?: string;
+}
+
 export const KafkaTopicMutableConfigKeys = [
   "cleanup.policy",
   "retention.ms",
@@ -405,6 +415,62 @@ export function validateKafkaTopicCatalog(
   };
 }
 
+export function getKafkaTopicReconciliationCatalog(
+  options: KafkaTopicExpansionOptions = {},
+): KafkaTopicCatalog {
+  return expandKafkaTopicCatalog(getKafkaTopicCatalog(), options);
+}
+
+export function expandKafkaTopicCatalog(
+  catalog: KafkaTopicCatalog = getKafkaTopicCatalog(),
+  options: KafkaTopicExpansionOptions = {},
+): KafkaTopicCatalog {
+  const retryTopicSuffix =
+    options.retryTopicSuffix ?? DEFAULT_KAFKA_RETRY_TOPIC_SUFFIX;
+  const deadLetterTopicSuffix =
+    options.deadLetterTopicSuffix ?? DEFAULT_KAFKA_DEAD_LETTER_TOPIC_SUFFIX;
+  const includeRetryTopics = options.includeRetryTopics ?? true;
+  const includeDeadLetterTopics = options.includeDeadLetterTopics ?? true;
+  const topics = [...catalog.topics];
+  const seen = new Set(topics.map((entry) => entry.topic));
+
+  for (const entry of catalog.topics) {
+    if (
+      isKafkaRetryTopic(entry.topic, retryTopicSuffix) ||
+      isKafkaDeadLetterTopic(entry.topic, deadLetterTopicSuffix)
+    ) {
+      continue;
+    }
+
+    if (includeRetryTopics) {
+      const retryTopic = retryKafkaTopicName(entry.topic, retryTopicSuffix);
+      if (!seen.has(retryTopic)) {
+        topics.push(createDerivedTopicEntry(entry, retryTopic, "retry"));
+        seen.add(retryTopic);
+      }
+    }
+
+    if (includeDeadLetterTopics) {
+      const deadLetterTopic = deadLetterKafkaTopicName(
+        entry.topic,
+        retryTopicSuffix,
+        deadLetterTopicSuffix,
+      );
+      if (!seen.has(deadLetterTopic)) {
+        topics.push(createDerivedTopicEntry(entry, deadLetterTopic, "dlq"));
+        seen.add(deadLetterTopic);
+      }
+    }
+  }
+
+  topics.sort((left, right) => left.topic.localeCompare(right.topic));
+
+  return {
+    ...catalog,
+    topics,
+  };
+}
+
 export function inferKafkaTopicPolicy(topic: string): KafkaTopicPolicyName {
   if (topic.startsWith("logstream.")) {
     return "logstream";
@@ -423,6 +489,44 @@ export function inferKafkaTopicPolicy(topic: string): KafkaTopicPolicyName {
   }
 
   return "default";
+}
+
+export function isKafkaRetryTopic(
+  topic: string,
+  retryTopicSuffix = DEFAULT_KAFKA_RETRY_TOPIC_SUFFIX,
+): boolean {
+  return topic.endsWith(retryTopicSuffix) || topic.includes(".retry.");
+}
+
+export function isKafkaDeadLetterTopic(
+  topic: string,
+  deadLetterTopicSuffix = DEFAULT_KAFKA_DEAD_LETTER_TOPIC_SUFFIX,
+): boolean {
+  return topic.endsWith(deadLetterTopicSuffix) || topic.includes(".dlq.");
+}
+
+export function retryKafkaTopicName(
+  topic: string,
+  retryTopicSuffix = DEFAULT_KAFKA_RETRY_TOPIC_SUFFIX,
+): string {
+  return isKafkaRetryTopic(topic, retryTopicSuffix)
+    ? topic
+    : `${topic}${retryTopicSuffix}`;
+}
+
+export function deadLetterKafkaTopicName(
+  topic: string,
+  retryTopicSuffix = DEFAULT_KAFKA_RETRY_TOPIC_SUFFIX,
+  deadLetterTopicSuffix = DEFAULT_KAFKA_DEAD_LETTER_TOPIC_SUFFIX,
+): string {
+  if (isKafkaDeadLetterTopic(topic, deadLetterTopicSuffix)) return topic;
+  if (topic.endsWith(retryTopicSuffix)) {
+    return `${topic.slice(0, -retryTopicSuffix.length)}${deadLetterTopicSuffix}`;
+  }
+  if (topic.includes(".retry.")) {
+    return topic.replace(".retry.", ".dlq.");
+  }
+  return `${topic}${deadLetterTopicSuffix}`;
 }
 
 export function isValidKafkaTopicName(topic: string): boolean {
@@ -456,6 +560,28 @@ function inferKafkaTopicOwnership(
     owner: consumer,
     producers: [producer],
     consumers: [consumer],
+  };
+}
+
+function createDerivedTopicEntry(
+  source: KafkaTopicCatalogEntry,
+  topic: string,
+  policy: Extract<KafkaTopicPolicyName, "retry" | "dlq">,
+): KafkaTopicCatalogEntry {
+  const policyDefaults = KafkaTopicPolicies[policy];
+  return {
+    ...source,
+    topic,
+    key: `${source.key}.${policy}`,
+    description: `${policy.toUpperCase()} topic for ${source.topic}.`,
+    producers: source.consumers,
+    consumers: source.consumers,
+    policy,
+    partitions: policyDefaults.partitions,
+    replicas: policyDefaults.replicas,
+    config: {
+      ...policyDefaults.config,
+    },
   };
 }
 

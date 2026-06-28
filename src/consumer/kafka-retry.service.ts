@@ -2,6 +2,14 @@ import { KAFKA_OPTIONS } from "../core/kafka.constants.js";
 import type { KafkaModuleOptions } from "../core/kafka.options.js";
 import { KafkaProducerService } from "../producer/kafka-producer.service.js";
 import { KAFKA_RETRY_HEADERS } from "../types/kafka-constants.js";
+import {
+  DEFAULT_KAFKA_DEAD_LETTER_TOPIC_SUFFIX,
+  DEFAULT_KAFKA_RETRY_TOPIC_SUFFIX,
+  deadLetterKafkaTopicName,
+  isKafkaDeadLetterTopic,
+  isKafkaRetryTopic,
+  retryKafkaTopicName,
+} from "../types/kafka-topics.js";
 import { Inject, Injectable, Optional } from "@nestjs/common";
 import { OmnixysLogger } from "@omnixys/logger";
 
@@ -90,15 +98,25 @@ export class KafkaRetryService {
   }
 
   retryTopic(topic: string): string {
-    return `${topic}${this.options?.retry?.retryTopicSuffix ?? ".retry"}`;
+    return retryKafkaTopicName(topic, this.retryTopicSuffix);
   }
 
   deadLetterTopic(topic: string): string {
-    return `${topic}${this.options?.retry?.deadLetterTopicSuffix ?? ".dlq"}`;
+    return deadLetterKafkaTopicName(
+      topic,
+      this.retryTopicSuffix,
+      this.deadLetterTopicSuffix,
+    );
   }
 
   retryTopics(topics: readonly string[]): string[] {
-    return topics.map((topic) => this.retryTopic(topic));
+    return topics
+      .filter(
+        (topic) =>
+          !isKafkaRetryTopic(topic, this.retryTopicSuffix) &&
+          !isKafkaDeadLetterTopic(topic, this.deadLetterTopicSuffix),
+      )
+      .map((topic) => this.retryTopic(topic));
   }
 
   originalTopic(
@@ -107,8 +125,9 @@ export class KafkaRetryService {
   ): string {
     const explicit = headers[KAFKA_RETRY_HEADERS.ORIGINAL_TOPIC];
     if (explicit) return explicit;
-    const suffix = this.options?.retry?.retryTopicSuffix ?? ".retry";
-    return topic.endsWith(suffix) ? topic.slice(0, -suffix.length) : topic;
+    return topic.endsWith(this.retryTopicSuffix)
+      ? topic.slice(0, -this.retryTopicSuffix.length)
+      : topic;
   }
 
   diagnostics() {
@@ -116,9 +135,8 @@ export class KafkaRetryService {
       maxRetries: this.maxRetries,
       initialDelayMs: this.initialDelayMs,
       maxDelayMs: this.maxDelayMs,
-      retryTopicSuffix: this.options?.retry?.retryTopicSuffix ?? ".retry",
-      deadLetterTopicSuffix:
-        this.options?.retry?.deadLetterTopicSuffix ?? ".dlq",
+      retryTopicSuffix: this.retryTopicSuffix,
+      deadLetterTopicSuffix: this.deadLetterTopicSuffix,
     };
   }
 
@@ -139,6 +157,19 @@ export class KafkaRetryService {
 
   private get maxDelayMs(): number {
     return this.options?.retry?.maxDelayMs ?? 60_000;
+  }
+
+  private get retryTopicSuffix(): string {
+    return (
+      this.options?.retry?.retryTopicSuffix ?? DEFAULT_KAFKA_RETRY_TOPIC_SUFFIX
+    );
+  }
+
+  private get deadLetterTopicSuffix(): string {
+    return (
+      this.options?.retry?.deadLetterTopicSuffix ??
+      DEFAULT_KAFKA_DEAD_LETTER_TOPIC_SUFFIX
+    );
   }
 }
 
