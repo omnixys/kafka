@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.1.1](https://github.com/omnixys/kafka/compare/v2.1.0...v2.1.1) (2026-06-28)
+
+### Topic
+
+* **Topic:** fix retry logic ([](https://github.com/omnixys/kafka/commit/5f9e3e1e1811e61c16ad8d03a403f7928b78bbb9))
+
 ## [2.1.0](https://github.com/omnixys/kafka/compare/v2.0.2...v2.1.0) (2026-06-26)
 
 ### Manager
