@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.1.2](https://github.com/omnixys/kafka/compare/v2.1.1...v2.1.2) (2026-06-29)
+
+### Kafka
+
+* **Kafka:** fix retry service ([](https://github.com/omnixys/kafka/commit/43a33c5c947c96535806aaff95028086add48cda))
+
 ## [2.1.1](https://github.com/omnixys/kafka/compare/v2.1.0...v2.1.1) (2026-06-28)
 
 ### Topic
