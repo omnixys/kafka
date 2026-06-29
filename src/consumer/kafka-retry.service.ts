@@ -6,6 +6,7 @@ import {
   DEFAULT_KAFKA_DEAD_LETTER_TOPIC_SUFFIX,
   DEFAULT_KAFKA_RETRY_TOPIC_SUFFIX,
   deadLetterKafkaTopicName,
+  expandKafkaTopicNames,
   isKafkaDeadLetterTopic,
   isKafkaRetryTopic,
   retryKafkaTopicName,
@@ -110,13 +111,12 @@ export class KafkaRetryService {
   }
 
   retryTopics(topics: readonly string[]): string[] {
-    return topics
-      .filter(
-        (topic) =>
-          !isKafkaRetryTopic(topic, this.retryTopicSuffix) &&
-          !isKafkaDeadLetterTopic(topic, this.deadLetterTopicSuffix),
-      )
-      .map((topic) => this.retryTopic(topic));
+    return expandKafkaTopicNames(topics, {
+      includeRetryTopics: true,
+      includeDeadLetterTopics: false,
+      retryTopicSuffix: this.retryTopicSuffix,
+      deadLetterTopicSuffix: this.deadLetterTopicSuffix,
+    });
   }
 
   originalTopic(

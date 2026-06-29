@@ -421,6 +421,57 @@ export function getKafkaTopicReconciliationCatalog(
   return expandKafkaTopicCatalog(getKafkaTopicCatalog(), options);
 }
 
+/**
+ * Expands a list of topic names into their retry and DLQ variants.
+ * Uses the same derivation logic as expandKafkaTopicCatalog().
+ * This is the shared function used by both the runtime consumer
+ * and the topic manager to ensure topic derivation never diverges.
+ */
+export function expandKafkaTopicNames(
+  topics: readonly string[],
+  options: KafkaTopicExpansionOptions = {},
+): string[] {
+  const retryTopicSuffix =
+    options.retryTopicSuffix ?? DEFAULT_KAFKA_RETRY_TOPIC_SUFFIX;
+  const deadLetterTopicSuffix =
+    options.deadLetterTopicSuffix ?? DEFAULT_KAFKA_DEAD_LETTER_TOPIC_SUFFIX;
+  const includeRetryTopics = options.includeRetryTopics ?? true;
+  const includeDeadLetterTopics = options.includeDeadLetterTopics ?? false;
+  const result = [...topics];
+  const seen = new Set(result);
+
+  for (const topic of topics) {
+    if (
+      isKafkaRetryTopic(topic, retryTopicSuffix) ||
+      isKafkaDeadLetterTopic(topic, deadLetterTopicSuffix)
+    ) {
+      continue;
+    }
+
+    if (includeRetryTopics) {
+      const retryTopic = retryKafkaTopicName(topic, retryTopicSuffix);
+      if (!seen.has(retryTopic)) {
+        result.push(retryTopic);
+        seen.add(retryTopic);
+      }
+    }
+
+    if (includeDeadLetterTopics) {
+      const deadLetterTopic = deadLetterKafkaTopicName(
+        topic,
+        retryTopicSuffix,
+        deadLetterTopicSuffix,
+      );
+      if (!seen.has(deadLetterTopic)) {
+        result.push(deadLetterTopic);
+        seen.add(deadLetterTopic);
+      }
+    }
+  }
+
+  return result;
+}
+
 export function expandKafkaTopicCatalog(
   catalog: KafkaTopicCatalog = getKafkaTopicCatalog(),
   options: KafkaTopicExpansionOptions = {},
