@@ -3,6 +3,12 @@
 All notable changes in this project will be documented in this file.
 
 
+## [2.2.0](https://github.com/omnixys/kafka/compare/v2.1.2...v2.2.0) (2026-07-02)
+
+### Topic
+
+* **Topic:** add new topics ([](https://github.com/omnixys/kafka/commit/f3c4e2315c58c01eafdc764ad480991991362465))
+
 ## [2.1.2](https://github.com/omnixys/kafka/compare/v2.1.1...v2.1.2) (2026-06-29)
 
 ### Kafka
