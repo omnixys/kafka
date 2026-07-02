@@ -52,6 +52,8 @@ export const KafkaTopics = {
     mediaUploaded: "event.media.uploaded",
     milestoneRecorded: "event.milestone.recorded",
 
+    created: "event.created",
+    updated: "event.updated",
     roleAssigned: "event.role.assigned",
     roleRemoved: "event.role.removed",
     ownerChanged: "event.owner.changed",
@@ -76,6 +78,7 @@ export const KafkaTopics = {
 
   logstream: {
     log: "logstream.log",
+    input: "logstream.input",
     restart: `admin.restart.logstream`,
     shutdown: `admin.shutdown.logstream`,
   },
